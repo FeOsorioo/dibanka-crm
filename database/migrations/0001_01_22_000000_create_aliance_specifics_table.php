@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('consultations_afiliados', function (Blueprint $table) {
+        Schema::create('aliance_specifics', function (Blueprint $table) {
             $table->id();
             $table->string('name')->default('');
+            $table->foreignId('consultation_id')->constrained('aliance_consultations')->onDelete('cascade');
             $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('consultations_afiliados');
+        Schema::dropIfExists('aliance_specifics');
     }
 };

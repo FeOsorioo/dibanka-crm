@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payroll_consultations_afiliados', function (Blueprint $table) {
+        Schema::create('affiliate_consultations_payroll', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('consultation_id')->constrained('consultations_afiliados')->cascadeOnDelete();
+            $table->foreignId('consultation_id')->constrained('affiliate_consultations')->cascadeOnDelete();
             $table->foreignId('payroll_id')->constrained('payrolls')->cascadeOnDelete();
             $table->timestamps();
         });
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payroll_consultations_afiliados');
+        Schema::dropIfExists('affiliate_consultations_payroll');
     }
 };

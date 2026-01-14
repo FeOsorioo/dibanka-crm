@@ -201,6 +201,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [CampaignController::class, 'index']);
     });
 
+    // ------------------- Operadores Entidades -------------------
+    Route::prefix('operator-entities')->group(function () {
+        Route::get('/', [OperatorEntityController::class, 'index']);
+        Route::post('/', [OperatorEntityController::class, 'store']);
+        Route::get('/{id}', [OperatorEntityController::class, 'show']);
+        Route::put('/{id}', [OperatorEntityController::class, 'update']);
+        Route::delete('/{id}', [OperatorEntityController::class, 'destroy']);
+    });
+
     // ------------------- Historial de Cambios -------------------
     Route::prefix('change-histories')->group(function () {
         Route::get('/', [ChangeHistoryController::class, 'index']);

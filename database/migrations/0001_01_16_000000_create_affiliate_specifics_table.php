@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('specifics_aliados', function (Blueprint $table) {
+        Schema::create('affiliate_specifics', function (Blueprint $table) {
             $table->id();
             $table->string('name')->default('');
-            $table->foreignId('consultation_id')->constrained('consultations_aliados')->onDelete('cascade');
+            $table->foreignId('consultation_id')->constrained('affiliate_consultations')->onDelete('cascade');
             $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('specifics_aliados');
+        Schema::dropIfExists('affiliate_specifics');
     }
 };

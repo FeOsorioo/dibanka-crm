@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('management_afiliados', function (Blueprint $table) {
+        Schema::create('aliance_management', function (Blueprint $table) {
             $table->id();
             $table->text('wolkvox_id');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
+            $table->foreignId('contact_id')->constrained('aliance_contacts')->onDelete('cascade');
+            $table->foreignId('payroll_management')->constrained('payrolls')->onDelete('cascade');
             $table->boolean('solution')->default(1);
-            $table->foreignId('consultation_id')->constrained('consultations_afiliados')->onDelete('cascade');
-            $table->foreignId('specific_id')->nullable()->constrained('specifics_afiliados')->nullOnDelete();
+            $table->foreignId('consultation_id')->constrained('aliance_consultations')->onDelete('cascade');
+            $table->foreignId('specific_id')->nullable()->constrained('aliance_specifics')->nullOnDelete();
             $table->foreignId('type_management_id')->constrained('type_management')->onDelete('cascade');
             $table->text('comments')->nullable();
             $table->date('solution_date')->nullable();
@@ -34,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('management_afiliados');
+        Schema::dropIfExists('aliance_management');
     }
 };

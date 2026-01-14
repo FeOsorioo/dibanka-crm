@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
         // -----------------------------
         // 1) ROLES
         // -----------------------------
-        $adminRole  = Role::firstOrCreate(['name' => 'Administrador']);/* 
+        $adminRole  = Role::firstOrCreate(['name' => 'Administrador']);
         $liderRole  = Role::firstOrCreate(['name' => 'Lider de Campaña']);
-        $agenteRole = Role::firstOrCreate(['name' => 'Agente']); */
+        $agenteRole = Role::firstOrCreate(['name' => 'Agente']);
 
         // -----------------------------
         // 2) USERS
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
                 'password'   => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],/* 
+            ],
             [
                 'name'       => 'Lider de campaña',
                 'email'      => 'campaing_manager@example.com',
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
                 'password'   => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], */
+            ],
         ];
 
         $userIds = [];
@@ -60,9 +60,9 @@ class DatabaseSeeder extends Seeder
         }
 
         // Asignar roles (uso de assignRole con nombre de rol para evitar problemas con ids)
-        if (! empty($userIds[0])) User::find($userIds[0])->assignRole($adminRole->name);/* 
+        if (! empty($userIds[0])) User::find($userIds[0])->assignRole($adminRole->name);
         if (! empty($userIds[1])) User::find($userIds[1])->assignRole($liderRole->name);
-        if (! empty($userIds[2])) User::find($userIds[2])->assignRole($agenteRole->name); */
+        if (! empty($userIds[2])) User::find($userIds[2])->assignRole($agenteRole->name);
 
         // -----------------------------
         // 3) CAMPAÑAS (campaign)
@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        /* 
+        
         // -----------------------------
         // 4) PAGADURIAS (payrolls)
         // -----------------------------
@@ -183,13 +183,13 @@ class DatabaseSeeder extends Seeder
         }
 
         // -----------------------------
-        // 7) CONTACT (crear o tomar)
+        // 7) CONTACT ALIADOS Y AFILIADOS(crear o tomar)
         // -----------------------------
-        $existingContactAliados = DB::table('contacts')->where('identification_number', '12345678')->first();
+        $existingContactAliados = DB::table('contacts_aliados')->where('identification_number', '12345678')->first();
         if ($existingContactAliados) {
             $contactIdAliados = $existingContactAliados->id;
         } else {
-            $contactIdAliados = DB::table('contacts')->insertGetId([
+            $contactIdAliados = DB::table('contacts_aliados')->insertGetId([
                 'campaign_id'           => $aliadosId,
                 'payroll_id'            => $payrollIds[1] ?? null,
                 'name'                  => 'Juan Pérez',
@@ -203,11 +203,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $existingContactAfiliados = DB::table('contacts')->where('identification_number', '5948984')->first();
+        $existingContactAfiliados = DB::table('contacts_afiliados')->where('identification_number', '5948984')->first();
         if ($existingContactAfiliados) {
             $contactIdAfiliados = $existingContactAfiliados->id;
         } else {
-            $contactIdAfiliados = DB::table('contacts')->insertGetId([
+            $contactIdAfiliados = DB::table('contacts_afiliados')->insertGetId([
                 'campaign_id'           => $afiliadosId,
                 'payroll_id'            => $payrollIds[1] ?? null,
                 'name'                  => 'Julio Perez',
@@ -261,6 +261,7 @@ class DatabaseSeeder extends Seeder
                 'management_messi' => 'Nota Creada',
                 'id_call'          => '68b871ae742f0866f0010a1d',
                 'id_messi'         => 'CTR-881585',
+                'observations'     => 'Observaciones',
                 'created_at'       => now(),
                 'updated_at'       => now(),
             ]);
@@ -399,6 +400,24 @@ class DatabaseSeeder extends Seeder
                     'updated_at'      => now(),
                 ],
             ]);
-        } */
+        } 
+        
+        // -----------------------------
+        // 14) OPERADORES - ENTIDADES
+        // -----------------------------
+        DB::table('operator_entity')->insert([
+                [
+                    'name'            => 'SUCREDI SAS',
+                    'description'     => 'SUCREDI SAS',
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
+                [
+                    'name'            => 'JARDINES DEL RENACER S.A.S',
+                    'description'     => 'JARDINES DEL RENACER S.A.S',
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
+            ]);
     }
 }
