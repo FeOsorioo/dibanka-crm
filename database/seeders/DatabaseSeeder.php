@@ -67,17 +67,16 @@ class DatabaseSeeder extends Seeder
         // -----------------------------
         // 3) CAMPAÑAS (campaign)
         // -----------------------------
-        // Nota: en tu código original la tabla se llama 'campaign' (singular). Lo mantuve.
 
-        $aliados = DB::table('campaign')->where('name', 'Aliados')->first();
-        $aliadosId = $aliados ? $aliados->id : DB::table('campaign')->insertGetId([
+        $aliance = DB::table('campaign')->where('name', 'Aliados')->first();
+        $alianceId = $aliance ? $aliance->id : DB::table('campaign')->insertGetId([
             'name'       => 'Aliados',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        $afiliados = DB::table('campaign')->where('name', 'Afiliados')->first();
-        $afiliadosId = $afiliados ? $afiliados->id : DB::table('campaign')->insertGetId([
+        $affiliate = DB::table('campaign')->where('name', 'Afiliados')->first();
+        $affiliateId = $affiliate ? $affiliate->id : DB::table('campaign')->insertGetId([
             'name'       => 'Afiliados',
             'created_at' => now(),
             'updated_at' => now(),
@@ -125,14 +124,14 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // -----------------------------
+        // -------------------------------------
         // 5) CONSULTAS AFILIADOS y ALIADOS
-        // -----------------------------
-        $existingAfil = DB::table('consultations_afiliados')->first();
-        if ($existingAfil) {
-            $consultationIdAFIL = $existingAfil->id;
+        // -------------------------------------
+        $existingAffiliateConsultation = DB::table('affiliate_consultations')->first();
+        if ($existingAffiliateConsultation) {
+            $consultationIdAffiliate = $existingAffiliateConsultation->id;
         } else {
-            $consultationIdAFIL = DB::table('consultations_afiliados')->insertGetId([
+            $consultationIdAffiliate = DB::table('affiliate_consultations')->insertGetId([
                 'name'       => 'Consulta afiliados 1',
                 'is_active'  => 1,
                 'created_at' => now(),
@@ -140,11 +139,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $existingAli = DB::table('consultations_aliados')->first();
-        if ($existingAli) {
-            $consultationIdALI = $existingAli->id;
+        $existingAlianceConsultation = DB::table('aliance_consultations')->first();
+        if ($existingAlianceConsultation) {
+            $consultationIdAliance = $existingAlianceConsultation->id;
         } else {
-            $consultationIdALI = DB::table('consultations_aliados')->insertGetId([
+            $consultationIdAliance = DB::table('aliance_consultations')->insertGetId([
                 'name'       => 'Consulta aliados 1',
                 'is_active'  => 1,
                 'created_at' => now(),
@@ -152,74 +151,97 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // -----------------------------
-        // 6) SPECIFICS -> USAR insertGetId() (corrección importante)
-        // -----------------------------
-        // Antes usabas insert() que devuelve true/false; aquí necesitas el ID para relacionarlo con managements.
-        $specificIAFIL = DB::table('specifics_afiliados')->where('name', 'Consulta Especifica afiliados 1')->first();
-        if ($specificIAFIL) {
-            $specificIAFILId = $specificIAFIL->id;
+        // -----------------------------------
+        // 6) SPECIFICS AFILIADOS Y ALIADOS
+        // -----------------------------------
+        $specificAffiliate = DB::table('affiliate_specifics')->where('name', 'Consulta Especifica afiliados 1')->first();
+        if ($specificAffiliate) {
+            $specificAffiliateId = $specificAffiliate->id;
         } else {
-            $specificIAFILId = DB::table('specifics_afiliados')->insertGetId([
+            $specificAffiliateId = DB::table('affiliate_specifics')->insertGetId([
                 'name'            => 'Consulta Especifica afiliados 1',
-                'consultation_id' => $consultationIdAFIL,
+                'consultation_id' => $consultationIdAffiliate,
                 'is_active'       => 1,
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ]);
         }
 
-        $specificIALI = DB::table('specifics_aliados')->where('name', 'Consulta Especifica aliados 1')->first();
-        if ($specificIALI) {
-            $specificIALIId = $specificIALI->id;
+        $specificAliance = DB::table('aliance_specifics')->where('name', 'Consulta Especifica aliados 1')->first();
+        if ($specificAliance) {
+            $specificAlianceId = $specificAliance->id;
         } else {
-            $specificIALIId = DB::table('specifics_aliados')->insertGetId([
+            $specificAlianceId = DB::table('aliance_specifics')->insertGetId([
                 'name'            => 'Consulta Especifica aliados 1',
-                'consultation_id' => $consultationIdALI,
+                'consultation_id' => $consultationIdAliance,
                 'is_active'       => 1,
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ]);
         }
-
-        // -----------------------------
-        // 7) CONTACT ALIADOS Y AFILIADOS(crear o tomar)
-        // -----------------------------
-        $existingContactAliados = DB::table('contacts_aliados')->where('identification_number', '12345678')->first();
-        if ($existingContactAliados) {
-            $contactIdAliados = $existingContactAliados->id;
+        // --------------------------------
+        // 7) ENTIDADES OPERADORES 
+        // --------------------------------
+        $operatorEntity = DB::table('operator_entities')->first();
+        if ($operatorEntity) {
+            $operatorEntityId = $operatorEntity->id;
         } else {
-            $contactIdAliados = DB::table('contacts_aliados')->insertGetId([
-                'campaign_id'           => $aliadosId,
-                'payroll_id'            => $payrollIds[1] ?? null,
-                'name'                  => 'Juan Pérez',
-                'identification_type'   => 'Cédula',
-                'phone'                 => '3123456789',
-                'identification_number' => '12345678',
-                'update_phone'          => '3123456789',
-                'email'                 => 'juan@example.com',
-                'created_at'            => now(),
-                'updated_at'            => now(),
+            $operatorEntityId = DB::table('operator_entities')->insertGetId([
+                'name'       => 'Entidad de un operador',
+                'description'=> 'Entidad de un operador',
+                'is_active'  => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
-        $existingContactAfiliados = DB::table('contacts_afiliados')->where('identification_number', '5948984')->first();
-        if ($existingContactAfiliados) {
-            $contactIdAfiliados = $existingContactAfiliados->id;
-        } else {
-            $contactIdAfiliados = DB::table('contacts_afiliados')->insertGetId([
-                'campaign_id'           => $afiliadosId,
-                'payroll_id'            => $payrollIds[1] ?? null,
-                'name'                  => 'Julio Perez',
-                'identification_type'   => 'Cédula',
-                'phone'                 => '3123456789',
-                'identification_number' => '5948984',
-                'update_phone'          => '3123456789',
-                'email'                 => 'julio@example.com',
-                'created_at'            => now(),
-                'updated_at'            => now(),
+        // -----------------------------
+        // 13) PIVOTES payroll_consultations_afiliados y _aliados
+        // -----------------------------
+        // Evitar duplicados al insertar
+        $existsPA1 = DB::table('affiliate_consultations_payroll')
+            ->where('consultation_id', $consultationIdAffiliate)
+            ->where('payroll_id', $payrollIds[0] ?? 0)
+            ->first();
+
+        if (! $existsPA1) {
+            DB::table('affiliate_consultations_payroll')->insert([
+                [
+                    'consultation_id' => $consultationIdAffiliate,
+                    'payroll_id'      => $payrollIds[0] ?? null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
+                [
+                    'consultation_id' => $consultationIdAffiliate,
+                    'payroll_id'      => $payrollIds[1] ?? null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
             ]);
         }
+
+        $existsPB1 = DB::table('aliance_consultations_payroll')
+            ->where('consultation_id', $consultationIdAliance)
+            ->where('payroll_id', $payrollIds[0] ?? 0)
+            ->first();
+
+        if (! $existsPB1) {
+            DB::table('aliance_consultations_payroll')->insert([
+                [
+                    'consultation_id' => $consultationIdAliance,
+                    'payroll_id'      => $payrollIds[0] ?? null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
+                [
+                    'consultation_id' => $consultationIdAliance,
+                    'payroll_id'      => $payrollIds[1] ?? null,
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ],
+            ]);
+        } 
 
         // -----------------------------
         // 8) TYPE MANAGEMENT (ya estaba correcto pero lo dejamos seguro)
@@ -251,23 +273,6 @@ class DatabaseSeeder extends Seeder
         }
 
         // -----------------------------
-        // 10) SPECIAL CASES
-        // -----------------------------
-        $existsSpecial = DB::table('special_cases')->where('id_messi', 'CTR-881585')->first();
-        if (! $existsSpecial) {
-            DB::table('special_cases')->insert([
-                'user_id'          => $userIds[0] ?? 1,
-                'contact_id'       => $contactIdAliados,
-                'management_messi' => 'Nota Creada',
-                'id_call'          => '68b871ae742f0866f0010a1d',
-                'id_messi'         => 'CTR-881585',
-                'observations'     => 'Observaciones',
-                'created_at'       => now(),
-                'updated_at'       => now(),
-            ]);
-        }
-
-        // -----------------------------
         // 11) MONITORING (seguimiento)
         // -----------------------------
         $existsMonitoring = DB::table('monitoring')->where('name', 'Solucion sin contacto')->first();
@@ -279,145 +284,151 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // -----------------------------
-        // 12) MANAGEMENTS -> AFILIADOS y ALIADOS (ejemplos)
-        // -----------------------------
-        // Usa los IDs correctos para 'specific' y 'type_management'
-        // Nota: $specificIAFILId y $specificIALIId contienen los IDs finales
-        DB::table('management_afiliados')->insert([
-            [
-                'user_id'            => $userIds[0] ?? 1,
-                'wolkvox_id'         => '68d44d8b6f25ca6591073f43a33',
-                'contact_id'         => $contactIdAfiliados,
-                'solution'           => 2,
-                'consultation_id'    => $consultationIdAFIL,
-                'specific_id'        => $specificIAFILId,
-                'type_management_id' => $typeManagementId,
-                'comments'           => 'Afiliado se comunica para conocer por qué aún su crédito se encuentra en estado de en revisión, esperando una autorización de Dibanka, se validan datos y se informa que es la entidad Financiera ',
-                'sms'                => 1,
-                'wsp'                => 1,
-                'solution_date'      => '2025-09-23',
-                'monitoring_id'      => 1,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ],
-            [
-                'user_id'            => $userIds[1] ?? 2,
-                'wolkvox_id'         => '68d44d8b6f25ca6591073f43as',
-                'contact_id'         => $contactIdAfiliados,
-                'solution'           => 1,
-                'consultation_id'    => $consultationIdAFIL,
-                'specific_id'        => $specificIAFILId,
-                'type_management_id' => $typeManagementId,
-                'comments'           => 'Aliado se comunica informa que necesita firmar la libranza pero no le llega el codigo otp, se validan datos se le indica que no tiene numero actualizado pero que valide todas las bandejas de entrada confirma que no hay nada se le solicita esperar un lapso de tiempo por si es un error de conexión',
-                'sms'                => 1,
-                'wsp'                => 1,
-                'solution_date'      => '2026-09-23',
-                'monitoring_id'      => 1,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ],
-        ]);
-
-        DB::table('management_aliados')->insert([
-            [
-                'user_id'            => $userIds[0] ?? 1,
-                'wolkvox_id'         => '68d44d8b6f25ca6591073f43a33',
-                'contact_id'         => $contactIdAliados,
-                'solution'           => 2,
-                'consultation_id'    => $consultationIdALI,
-                'specific_id'        => $specificIALIId,
-                'type_management_id' => $typeManagementId,
-                'comments'           => 'Afiliado se comunica para conocer por qué aún su crédito se encuentra en estado de en revisión, esperando una autorización de Dibanka, se validan datos y se informa que es la entidad Financiera ',
-                'sms'                => 1,
-                'wsp'                => 1,
-                'solution_date'      => '2025-09-23',
-                'monitoring_id'      => 1,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ],
-            [
-                'user_id'            => $userIds[1] ?? 2,
-                'wolkvox_id'         => '68d44d8b6f25ca6591073f43as',
-                'contact_id'         => $contactIdAliados,
-                'solution'           => 1,
-                'consultation_id'    => $consultationIdALI,
-                'specific_id'        => $specificIALIId,
-                'type_management_id' => $typeManagementId,
-                'comments'           => 'Aliado se comunica informa que necesita firmar la libranza pero no le llega el codigo otp, se validan datos se le indica que no tiene numero actualizado pero que valide todas las bandejas de entrada confirma que no hay nada se le solicita esperar un lapso de tiempo por si es un error de conexión',
-                'sms'                => 1,
-                'wsp'                => 1,
-                'solution_date'      => '2026-09-23',
-                'monitoring_id'      => 1,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ],
-        ]);
-
-        // -----------------------------
-        // 13) PIVOTES payroll_consultations_afiliados y _aliados
-        // -----------------------------
-        // Evitar duplicados al insertar
-        $existsPA1 = DB::table('payroll_consultations_afiliados')
-            ->where('consultation_id', $consultationIdAFIL)
-            ->where('payroll_id', $payrollIds[0] ?? 0)
-            ->first();
-
-        if (! $existsPA1) {
-            DB::table('payroll_consultations_afiliados')->insert([
-                [
-                    'consultation_id' => $consultationIdAFIL,
-                    'payroll_id'      => $payrollIds[0] ?? null,
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
-                [
-                    'consultation_id' => $consultationIdAFIL,
-                    'payroll_id'      => $payrollIds[1] ?? null,
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
+        // --------------------------------
+        // 7) CONTACT ALIADOS Y AFILIADOS 
+        // --------------------------------
+        $existingContactAliance = DB::table('aliance_contacts')->where('identification_number', '12345678')->first();
+        if ($existingContactAliance) {
+            $contactIdAliance = $existingContactAliance->id;
+        } else {
+            $contactIdAliance = DB::table('aliance_contacts')->insertGetId([
+                'campaign_id'           => $alianceId,
+                'payroll_id'            => $payrollIds[1] ?? null,
+                'operator_entities_id'    => $operatorEntityId,
+                'name'                  => 'Juan Pérez',
+                'identification_type'   => 'Cédula',
+                'phone'                 => '3123456789',
+                'identification_number' => '12345678',
+                'update_phone'          => '3123456789',
+                'email'                 => 'juan@example.com',
+                'created_at'            => now(),
+                'updated_at'            => now(),
             ]);
         }
 
-        $existsPB1 = DB::table('payroll_consultations_aliados')
-            ->where('consultation_id', $consultationIdALI)
-            ->where('payroll_id', $payrollIds[0] ?? 0)
-            ->first();
+        $existingContactAffiliate = DB::table('affiliate_contacts')->where('identification_number', '5948984')->first();
+        if ($existingContactAffiliate) {
+            $contactIdAffiliate = $existingContactAffiliate->id;
+        } else {
+            $contactIdAffiliate = DB::table('affiliate_contacts')->insertGetId([
+                'campaign_id'           => $affiliateId,
+                'payroll_id'            => $payrollIds[1] ?? null,
+                'name'                  => 'Julio Perez',
+                'identification_type'   => 'Cédula',
+                'phone'                 => '3123456789',
+                'identification_number' => '5948984',
+                'update_phone'          => '3123456789',
+                'email'                 => 'julio@example.com',
+                'created_at'            => now(),
+                'updated_at'            => now(),
+            ]);
+        }
 
-        if (! $existsPB1) {
-            DB::table('payroll_consultations_aliados')->insert([
-                [
-                    'consultation_id' => $consultationIdALI,
-                    'payroll_id'      => $payrollIds[0] ?? null,
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
-                [
-                    'consultation_id' => $consultationIdALI,
-                    'payroll_id'      => $payrollIds[1] ?? null,
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
-            ]);
-        } 
-        
         // -----------------------------
-        // 14) OPERADORES - ENTIDADES
+        // 12) MANAGEMENTS -> AFILIADOS y ALIADOS 
         // -----------------------------
-        DB::table('operator_entity')->insert([
-                [
-                    'name'            => 'SUCREDI SAS',
-                    'description'     => 'SUCREDI SAS',
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
-                [
-                    'name'            => 'JARDINES DEL RENACER S.A.S',
-                    'description'     => 'JARDINES DEL RENACER S.A.S',
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ],
+        DB::table('affiliate_management')->insert([
+            [
+                'user_id'            => $userIds[0] ?? 1,
+                'wolkvox_id'         => '68d44d8b6f25ca6591073f43a33',
+                'contact_id'         => $contactIdAffiliate,
+                'solution'           => 2,
+                'consultation_id'    => $consultationIdAffiliate,
+                'specific_id'        => $specificAffiliateId,
+                'type_management_id' => $typeManagementId,
+                'comments'           => 'Afiliado se comunica para conocer por qué aún su crédito se encuentra en estado de en revisión, esperando una autorización de Dibanka, se validan datos y se informa que es la entidad Financiera ',
+                'sms'                => 1,
+                'wsp'                => 1,
+                'solution_date'      => '2025-09-23',
+                'monitoring_id'      => 1,
+                'created_at'         => now(),
+                'updated_at'         => now(),
+            ],
+            [
+                'user_id'            => $userIds[1] ?? 2,
+                'wolkvox_id'         => '68d44d8b6f25ca6591073f43as',
+                'contact_id'         => $contactIdAffiliate,
+                'solution'           => 1,
+                'consultation_id'    => $consultationIdAffiliate,
+                'specific_id'        => $specificAffiliateId,
+                'type_management_id' => $typeManagementId,
+                'comments'           => 'Aliado se comunica informa que necesita firmar la libranza pero no le llega el codigo otp, se validan datos se le indica que no tiene numero actualizado pero que valide todas las bandejas de entrada confirma que no hay nada se le solicita esperar un lapso de tiempo por si es un error de conexión',
+                'sms'                => 1,
+                'wsp'                => 1,
+                'solution_date'      => '2026-09-23',
+                'monitoring_id'      => 1,
+                'created_at'         => now(),
+                'updated_at'         => now(),
+            ],
+        ]);
+
+        DB::table('aliance_management')->insert([
+            [
+                'user_id'               => $userIds[0] ?? 1,
+                'wolkvox_id'            => '68d44d8b6f25ca6591073f43a33',
+                'contact_id'            => $contactIdAliance,
+                'payroll_management_id' => $payrollIds[1] ?? null,
+                'solution'              => 2,
+                'consultation_id'       => $consultationIdAliance,
+                'specific_id'           => $specificAlianceId,
+                'type_management_id'    => $typeManagementId,
+                'comments'              => 'Afiliado se comunica para conocer por qué aún su crédito se encuentra en estado de en revisión, esperando una autorización de Dibanka, se validan datos y se informa que es la entidad Financiera ',
+                'sms'                   => 1,
+                'wsp'                   => 1,
+                'solution_date'         => '2025-09-23',
+                'monitoring_id'         => 1,
+                'created_at'            => now(),
+                'updated_at'            => now(),
+            ],
+            [
+                'user_id'               => $userIds[1] ?? 2,
+                'wolkvox_id'            => '68d44d8b6f25ca6591073f43as',
+                'contact_id'            => $contactIdAliance,
+                'payroll_management_id' => $payrollIds[1] ?? null,
+                'solution'              => 1,
+                'consultation_id'       => $consultationIdAliance,
+                'specific_id'           => $specificAlianceId,
+                'type_management_id'    => $typeManagementId,
+                'comments'              => 'Aliado se comunica informa que necesita firmar la libranza pero no le llega el codigo otp, se validan datos se le indica que no tiene numero actualizado pero que valide todas las bandejas de entrada confirma que no hay nada se le solicita esperar un lapso de tiempo por si es un error de conexión',
+                'sms'                   => 1,
+                'wsp'                   => 1,
+                'solution_date'         => '2026-09-23',
+                'monitoring_id'         => 1,
+                'created_at'            => now(),
+                'updated_at'            => now(),
+            ],
+        ]);
+
+        // -----------------------------
+        // 10) SPECIAL CASES
+        // -----------------------------
+        $existsAlianceSpecial = DB::table('aliance_special_cases')->where('id_messi', 'CTR-881585')->first();
+        if (! $existsAlianceSpecial) {
+            DB::table('aliance_special_cases')->insert([
+                'user_id'          => $userIds[0] ?? 1,
+                'contact_id'       => $contactIdAliance,
+                'operator_entities_id' => $operatorEntityId,
+                'management_messi' => 'Nota Creada',
+                'id_call'          => '68b871ae742f0866f0010a1d',
+                'id_messi'         => 'CTR-881585',
+                'observations'     => 'Observaciones',
+                'created_at'       => now(),
+                'updated_at'       => now(),
             ]);
+        }
+
+        $existsAffiliateSpecial = DB::table('affiliate_special_cases')->where('id_messi', 'CTR-881585')->first();
+        if (! $existsAffiliateSpecial) {
+            DB::table('affiliate_special_cases')->insert([
+                'user_id'          => $userIds[0] ?? 1,
+                'contact_id'       => $contactIdAffiliate,
+                'management_messi' => 'Nota Creada',
+                'id_call'          => '68b871ae742f0866f0010a1d',
+                'id_messi'         => 'CTR-881585',
+                'observations'     => 'Observaciones',
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
+        }
     }
 }

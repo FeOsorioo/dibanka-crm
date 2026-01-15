@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('wolkvox_id');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('contact_id')->constrained('aliance_contacts')->onDelete('cascade');
-            $table->foreignId('payroll_management')->constrained('payrolls')->onDelete('cascade');
+            $table->foreignId('payroll_management_id')->constrained('payrolls')->onDelete('cascade');
             $table->boolean('solution')->default(1);
             $table->foreignId('consultation_id')->constrained('aliance_consultations')->onDelete('cascade');
             $table->foreignId('specific_id')->nullable()->constrained('aliance_specifics')->nullOnDelete();

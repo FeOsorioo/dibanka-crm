@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('contact_id')->constrained('aliance_contacts')->onDelete('cascade');
-            $table->foreignId('operator_entity_id')->constrained('operator_entity')->onDelete('cascade');
+            $table->foreignId('operator_entities_id')->constrained('operator_entities')->onDelete('cascade');
             $table->string('management_messi');
             $table->string('id_call');
             $table->string('id_messi');

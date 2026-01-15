@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('campaign_id')->constrained('campaign')->onDelete('cascade');
             $table->foreignId('payroll_id')->constrained('payrolls')->onDelete('cascade');
-            $table->foreignId('operator_entity_id')->constrained('operator_entity')->onDelete('cascade');
+            $table->foreignId('operator_entities_id')->constrained('operator_entities')->onDelete('cascade');
             $table->string('name');
             $table->string('email');
             $table->string('phone');
