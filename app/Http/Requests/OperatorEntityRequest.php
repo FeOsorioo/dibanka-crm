@@ -22,7 +22,8 @@ class OperatorEntityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
         ];
     }
 
@@ -30,6 +31,10 @@ class OperatorEntityRequest extends FormRequest
     {
         return [
             'name.required' => 'El campo nombre es obligatorio.',
+            'name.string' => 'El campo nombre debe ser una cadena de texto.',
+            'name.max' => 'El campo nombre no debe exceder los 255 caracteres.',
+            
+            'description.string' => 'El campo descripción debe ser una cadena de texto.',
         ];
     }
 }

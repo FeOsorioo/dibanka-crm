@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Alliance;
 
-use App\Models\SpecialCases;
+use App\Models\Alliance\AllianceSpecialCases;
 use App\Models\ChangeHistory;
 
-class SpecialCaseObserver
+class AllianceSpecialCaseObserver
 {
-    public function created(SpecialCases $specialCases)
+    public function created(AllianceSpecialCases $specialCases)
     {
         ChangeHistory::create([
-            'entity_type' => SpecialCases::class,
+            'entity_type' => AllianceSpecialCases::class,
             'entity_id' => $specialCases->id,
             'action' => 'created',
             'new_values' => $specialCases->getAttributes(),

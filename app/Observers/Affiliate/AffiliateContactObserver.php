@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Affiliate;
 
-use App\Models\Contact;
+use App\Models\Affiliate\AffiliateContact;
 use App\Models\ChangeHistory;
 
-class ContactObserver
+class AffiliateContactObserver
 {
-    public function created(Contact $contact)
+    public function created(AffiliateContact $contact)
     {
         ChangeHistory::create([
-            'entity_type' => Contact::class,
+            'entity_type' => AffiliateContact::class,
             'entity_id' => $contact->id,
             'action' => 'created',
             'new_values' => $contact->getAttributes(),

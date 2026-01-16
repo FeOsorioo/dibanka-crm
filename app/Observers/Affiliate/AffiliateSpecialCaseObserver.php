@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Affiliate;
 
-use App\Models\SpecialCases;
+use App\Models\Affiliate\AffiliateSpecialCases;
 use App\Models\ChangeHistory;
 
-class SpecialCaseObserver
+class AffiliateSpecialCaseObserver
 {
-    public function created(SpecialCases $specialCases)
+    public function created(AffiliateSpecialCases $specialCases)
     {
         ChangeHistory::create([
-            'entity_type' => SpecialCases::class,
+            'entity_type' => AffiliateSpecialCases::class,
             'entity_id' => $specialCases->id,
             'action' => 'created',
             'new_values' => $specialCases->getAttributes(),

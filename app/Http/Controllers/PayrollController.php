@@ -176,7 +176,7 @@ class PayrollController extends Controller
                     ->where('payroll_id', $id)
                     ->delete();
                 
-                DB::table('payroll_consultations_afiliados')
+                DB::table('affiliate_consultations_payroll')
                     ->where('payroll_id', $id)
                     ->delete();
             }

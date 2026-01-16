@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Alliance;
 
-use App\Models\Aliados\Management;
+use App\Models\Alliance\AllianceManagement;
 use App\Models\ChangeHistory;
-class ManagementAliadoObserver
+class AllianceManagementObserver
 {
-    public function created(Management $management)
+    public function created(AllianceManagement $management)
     {
         ChangeHistory::create([
-            'entity_type' => Management::class,
+            'entity_type' => AllianceManagement::class,
             'entity_id' => $management->id,
             'action' => 'created',
             'new_values' => $management->getAttributes(),
@@ -19,10 +19,10 @@ class ManagementAliadoObserver
         ]);
     }
 
-    public function updated(Management $management)
+    public function updated(AllianceManagement $management)
     {
         ChangeHistory::create([
-            'entity_type' => Management::class,
+            'entity_type' => AllianceManagement::class,
             'entity_id' => $management->id,
             'action' => 'updated',
             'old_values' => $management->getOriginal(),

@@ -17,11 +17,11 @@ use App\Http\Controllers\{
     ChangeHistoryController,
 };
 
-use App\Http\Controllers\Aliados\ConsultationController as AliadosConsultationController;
-use App\Http\Controllers\Afiliados\ConsultationController as AfiliadosConsultationController;
+use App\Http\Controllers\Alliance\AllianceConsultationController;
+use App\Http\Controllers\Affiliate\AffiliateConsultationController;
 
 use App\Http\Controllers\Aliados\SpecificController as AliadosSpecificController;
-use App\Http\Controllers\Afiliados\SpecificController as AfiliadosSpecificController;
+use App\Http\Controllers\Affiliate\AffiliateSpecificController;
 
 use App\Http\Controllers\Aliados\ManagementController as AliadosManagementController;
 use App\Http\Controllers\Afiliados\ManagementController as AfiliadosManagementController;
@@ -64,43 +64,43 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         // ------------------- Consultas Afiliados -------------------
-        Route::prefix('consultations-afiliados')->group(function () {
-            Route::get('/', [AfiliadosConsultationController::class, 'index'])->middleware('permission:consultation.view');
-            Route::get('/active', [AfiliadosConsultationController::class, 'active'])->middleware('permission:consultation.view');
-            Route::get('/{id}', [AfiliadosConsultationController::class, 'show'])->middleware('permission:consultation.view');
-            Route::post('/', [AfiliadosConsultationController::class, 'store'])->middleware('permission:config.consultation.create');
-            Route::put('{consultation}', [AfiliadosConsultationController::class, 'update'])->middleware('permission:config.consultation.edit');
-            Route::delete('{consultation}', [AfiliadosConsultationController::class, 'destroy'])->middleware('permission:config.consultation.delete');
+        Route::prefix('affiliate-consultations')->group(function () {
+            Route::get('/', [AffiliateConsultationController::class, 'index'])->middleware('permission:consultation.view');
+            Route::get('/active', [AffiliateConsultationController::class, 'active'])->middleware('permission:consultation.view');
+            Route::get('/{id}', [AffiliateConsultationController::class, 'show'])->middleware('permission:consultation.view');
+            Route::post('/', [AffiliateConsultationController::class, 'store'])->middleware('permission:config.consultation.create');
+            Route::put('{id}', [AffiliateConsultationController::class, 'update'])->middleware('permission:config.consultation.edit');
+            Route::delete('{id}', [AffiliateConsultationController::class, 'destroy'])->middleware('permission:config.consultation.delete');
         });
 
         // ------------------- Consultas Aliados -------------------
-        Route::prefix('consultations-aliados')->group(function () {
-            Route::get('/', [AliadosConsultationController::class, 'index'])->middleware('permission:consultation.view');
-            Route::get('/active', [AliadosConsultationController::class, 'active'])->middleware('permission:consultation.view'); // <-- MOVER PRIMERO
-            Route::get('/{id}', [AliadosConsultationController::class, 'show'])->middleware('permission:consultation.view'); // <-- DESPUÉS
-            Route::post('/', [AliadosConsultationController::class, 'store'])->middleware('permission:config.consultation.create');
-            Route::put('{consultation}', [AliadosConsultationController::class, 'update'])->middleware('permission:config.consultation.edit');
-            Route::delete('{consultation}', [AliadosConsultationController::class, 'destroy'])->middleware('permission:config.consultation.delete');
+        Route::prefix('alliance-consultations')->group(function () {
+            Route::get('/', [AllianceConsultationController::class, 'index'])->middleware('permission:consultation.view');
+            Route::get('/active', [AllianceConsultationController::class, 'active'])->middleware('permission:consultation.view');
+            Route::get('/{id}', [AllianceConsultationController::class, 'show'])->middleware('permission:consultation.view');
+            Route::post('/', [AllianceConsultationController::class, 'store'])->middleware('permission:config.consultation.create');
+            Route::put('{consultation}', [AllianceConsultationController::class, 'update'])->middleware('permission:config.consultation.edit');
+            Route::delete('{consultation}', [AllianceConsultationController::class, 'destroy'])->middleware('permission:config.consultation.delete');
         });
 
         // ------------------- Consultas Específicas Afiliados -------------------
-        Route::prefix('consultationspecifics-afiliados')->group(function () {
-            Route::get('/', [AfiliadosSpecificController::class, 'index'])->middleware('permission:specific.view');
-            Route::get('/active', [AfiliadosSpecificController::class, 'active'])->middleware('permission:specific.view');
-            Route::get('/{id}', [AfiliadosSpecificController::class, 'show'])->middleware('permission:specific.view');
-            Route::post('/', [AfiliadosSpecificController::class, 'store'])->middleware('permission:config.specific.create');
-            Route::put('{consultationspecific}', [AfiliadosSpecificController::class, 'update'])->middleware('permission:config.specific.edit');
-            Route::delete('{consultationspecific}', [AfiliadosSpecificController::class, 'destroy'])->middleware('permission:config.specific.delete');
+        Route::prefix('affiliate-specifics')->group(function () {
+            Route::get('/', [AffiliateSpecificController::class, 'index'])->middleware('permission:specific.view');
+            Route::get('/active', [AffiliateSpecificController::class, 'active'])->middleware('permission:specific.view');
+            Route::get('/{id}', [AffiliateSpecificController::class, 'show'])->middleware('permission:specific.view');
+            Route::post('/', [AffiliateSpecificController::class, 'store'])->middleware('permission:config.specific.create');
+            Route::put('{id}', [AffiliateSpecificController::class, 'update'])->middleware('permission:config.specific.edit');
+            Route::delete('{id}', [AffiliateSpecificController::class, 'destroy'])->middleware('permission:config.specific.delete');
         });
 
         // ------------------- Consultas Específicas Aliados -------------------
-        Route::prefix('consultationspecifics-aliados')->group(function () {
+        Route::prefix('alliance-specifics')->group(function () {
             Route::get('/', [AliadosSpecificController::class, 'index'])->middleware('permission:specific.view');
             Route::get('/active', [AliadosSpecificController::class, 'active'])->middleware('permission:specific.view');
             Route::get('/{id}', [AliadosSpecificController::class, 'show'])->middleware('permission:specific.view');
             Route::post('/', [AliadosSpecificController::class, 'store'])->middleware('permission:config.specific.create');
-            Route::put('{consultationspecific}', [AliadosSpecificController::class, 'update'])->middleware('permission:config.specific.edit');
-            Route::delete('{consultationspecific}', [AliadosSpecificController::class, 'destroy'])->middleware('permission:config.specific.delete');
+            Route::put('{id}', [AliadosSpecificController::class, 'update'])->middleware('permission:config.specific.edit');
+            Route::delete('{id}', [AliadosSpecificController::class, 'destroy'])->middleware('permission:config.specific.delete');
         });
 
         // ------------------- Tipos de Gestiones -------------------

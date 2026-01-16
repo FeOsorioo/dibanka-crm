@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Affiliate;
 
-use App\Models\Afiliados\Management;
+use App\Models\Affiliate\AffiliateManagement;
 use App\Models\ChangeHistory;
-class ManagementAfiliadoObserver
+class AffiliateManagementObserver
 {
-    public function created(Management $management)
+    public function created(AffiliateManagement $management)
     {
         ChangeHistory::create([
-            'entity_type' => Management::class,
+            'entity_type' => AffiliateManagement::class,
             'entity_id' => $management->id,
             'action' => 'created',
             'new_values' => $management->getAttributes(),
@@ -19,10 +19,10 @@ class ManagementAfiliadoObserver
         ]);
     }
 
-    public function updated(Management $management)
+    public function updated(AffiliateManagement $management)
     {
         ChangeHistory::create([
-            'entity_type' => Management::class,
+            'entity_type' => AffiliateManagement::class,
             'entity_id' => $management->id,
             'action' => 'updated',
             'old_values' => $management->getOriginal(),

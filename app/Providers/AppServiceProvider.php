@@ -17,14 +17,16 @@ use App\Observers\Affiliate\AffiliateSpecialCaseObserver;
 use App\Observers\Alliance\AllianceSpecialCaseObserver;
 
 // CONTACTOS - MODELS
-use App\Models\Contact;
+use App\Models\Alliance\AllianceContact;
+use App\Models\Affiliate\AffiliateContact;
 
 // GESTIONES - MODELS
-use App\Models\Aliados\Management as ManagementAliados;
-use App\Models\Afiliados\Management as ManagementAfiliados;
+use App\Models\Alliance\AllianceManagement;
+use App\Models\Affiliate\AffiliateManagement;
 
 // CASOS ESPECIALES - MODELS
-use App\Models\SpecialCases;
+use App\Models\Alliance\AllianceSpecialCases;
+use App\Models\Affiliate\AffiliateSpecialCases;
 class AppServiceProvider extends ServiceProvider
 {
     /**

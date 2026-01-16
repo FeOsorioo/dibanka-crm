@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Observers;
+namespace App\Observers\Alliance;
 
-use App\Models\Contact;
+use App\Models\Alliance\AllianceContact;
 use App\Models\ChangeHistory;
 
-class ContactObserver
+class AllianceContactObserver
 {
-    public function created(Contact $contact)
+    public function created(AllianceContact $contact)
     {
         ChangeHistory::create([
-            'entity_type' => Contact::class,
+            'entity_type' => AllianceContact::class,
             'entity_id' => $contact->id,
             'action' => 'created',
             'new_values' => $contact->getAttributes(),
@@ -20,10 +20,10 @@ class ContactObserver
         ]);
     }
 
-    public function updated(Contact $contact)
+    public function updated(AllianceContact $contact)
     {
         ChangeHistory::create([
-            'entity_type' => Contact::class,
+            'entity_type' => AllianceContact::class,
             'entity_id' => $contact->id,
             'action' => 'updated',
             'old_values' => $contact->getOriginal(),
@@ -34,10 +34,10 @@ class ContactObserver
         ]);
     }
 
-    public function deleted(Contact $contact)
+    public function deleted(AllianceContact $contact)
     {
         ChangeHistory::create([
-            'entity_type' => Contact::class,
+            'entity_type' => AllianceContact::class,
             'entity_id' => $contact->id,
             'action' => 'deleted',
             'old_values' => $contact->getAttributes(),

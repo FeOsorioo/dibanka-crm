@@ -68,8 +68,8 @@ class DatabaseSeeder extends Seeder
         // 3) CAMPAÑAS (campaign)
         // -----------------------------
 
-        $aliance = DB::table('campaign')->where('name', 'Aliados')->first();
-        $alianceId = $aliance ? $aliance->id : DB::table('campaign')->insertGetId([
+        $allies = DB::table('campaign')->where('name', 'Aliados')->first();
+        $alliesId = $allies ? $allies->id : DB::table('campaign')->insertGetId([
             'name'       => 'Aliados',
             'created_at' => now(),
             'updated_at' => now(),
@@ -139,11 +139,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $existingAlianceConsultation = DB::table('aliance_consultations')->first();
-        if ($existingAlianceConsultation) {
-            $consultationIdAliance = $existingAlianceConsultation->id;
+        $existingAlliesConsultation = DB::table('allies_consultations')->first();
+        if ($existingAlliesConsultation) {
+            $consultationIdAllies = $existingAlliesConsultation->id;
         } else {
-            $consultationIdAliance = DB::table('aliance_consultations')->insertGetId([
+            $consultationIdAllies = DB::table('allies_consultations')->insertGetId([
                 'name'       => 'Consulta aliados 1',
                 'is_active'  => 1,
                 'created_at' => now(),
@@ -167,13 +167,13 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $specificAliance = DB::table('aliance_specifics')->where('name', 'Consulta Especifica aliados 1')->first();
-        if ($specificAliance) {
-            $specificAlianceId = $specificAliance->id;
+        $specificAllies = DB::table('allies_specifics')->where('name', 'Consulta Especifica aliados 1')->first();
+        if ($specificAllies) {
+            $specificAlliesId = $specificAllies->id;
         } else {
-            $specificAlianceId = DB::table('aliance_specifics')->insertGetId([
+            $specificAlliesId = DB::table('allies_specifics')->insertGetId([
                 'name'            => 'Consulta Especifica aliados 1',
-                'consultation_id' => $consultationIdAliance,
+                'consultation_id' => $consultationIdAllies,
                 'is_active'       => 1,
                 'created_at'      => now(),
                 'updated_at'      => now(),
@@ -196,7 +196,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // -----------------------------
-        // 13) PIVOTES payroll_consultations_afiliados y _aliados
+        // 13) PIVOTES affiliate_consultations_payroll y _aliados
         // -----------------------------
         // Evitar duplicados al insertar
         $existsPA1 = DB::table('affiliate_consultations_payroll')
@@ -221,21 +221,21 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $existsPB1 = DB::table('aliance_consultations_payroll')
-            ->where('consultation_id', $consultationIdAliance)
+        $existsPB1 = DB::table('allies_consultations_payroll')
+            ->where('consultation_id', $consultationIdAllies)
             ->where('payroll_id', $payrollIds[0] ?? 0)
             ->first();
 
         if (! $existsPB1) {
-            DB::table('aliance_consultations_payroll')->insert([
+            DB::table('allies_consultations_payroll')->insert([
                 [
-                    'consultation_id' => $consultationIdAliance,
+                    'consultation_id' => $consultationIdAllies,
                     'payroll_id'      => $payrollIds[0] ?? null,
                     'created_at'      => now(),
                     'updated_at'      => now(),
                 ],
                 [
-                    'consultation_id' => $consultationIdAliance,
+                    'consultation_id' => $consultationIdAllies,
                     'payroll_id'      => $payrollIds[1] ?? null,
                     'created_at'      => now(),
                     'updated_at'      => now(),
@@ -287,14 +287,14 @@ class DatabaseSeeder extends Seeder
         // --------------------------------
         // 7) CONTACT ALIADOS Y AFILIADOS 
         // --------------------------------
-        $existingContactAliance = DB::table('aliance_contacts')->where('identification_number', '12345678')->first();
-        if ($existingContactAliance) {
-            $contactIdAliance = $existingContactAliance->id;
+        $existingContactAllies = DB::table('allies_contacts')->where('identification_number', '12345678')->first();
+        if ($existingContactAllies) {
+            $contactIdAllies = $existingContactAllies->id;
         } else {
-            $contactIdAliance = DB::table('aliance_contacts')->insertGetId([
-                'campaign_id'           => $alianceId,
+            $contactIdAllies = DB::table('allies_contacts')->insertGetId([
+                'campaign_id'           => $alliesId,
                 'payroll_id'            => $payrollIds[1] ?? null,
-                'operator_entities_id'    => $operatorEntityId,
+                'operator_entity_id'    => $operatorEntityId,
                 'name'                  => 'Juan Pérez',
                 'identification_type'   => 'Cédula',
                 'phone'                 => '3123456789',
@@ -362,15 +362,15 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        DB::table('aliance_management')->insert([
+        DB::table('allies_management')->insert([
             [
                 'user_id'               => $userIds[0] ?? 1,
                 'wolkvox_id'            => '68d44d8b6f25ca6591073f43a33',
-                'contact_id'            => $contactIdAliance,
+                'contact_id'            => $contactIdAllies,
                 'payroll_management_id' => $payrollIds[1] ?? null,
                 'solution'              => 2,
-                'consultation_id'       => $consultationIdAliance,
-                'specific_id'           => $specificAlianceId,
+                'consultation_id'       => $consultationIdAllies,
+                'specific_id'           => $specificAlliesId,
                 'type_management_id'    => $typeManagementId,
                 'comments'              => 'Afiliado se comunica para conocer por qué aún su crédito se encuentra en estado de en revisión, esperando una autorización de Dibanka, se validan datos y se informa que es la entidad Financiera ',
                 'sms'                   => 1,
@@ -383,11 +383,11 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id'               => $userIds[1] ?? 2,
                 'wolkvox_id'            => '68d44d8b6f25ca6591073f43as',
-                'contact_id'            => $contactIdAliance,
+                'contact_id'            => $contactIdAllies,
                 'payroll_management_id' => $payrollIds[1] ?? null,
                 'solution'              => 1,
-                'consultation_id'       => $consultationIdAliance,
-                'specific_id'           => $specificAlianceId,
+                'consultation_id'       => $consultationIdAllies,
+                'specific_id'           => $specificAlliesId,
                 'type_management_id'    => $typeManagementId,
                 'comments'              => 'Aliado se comunica informa que necesita firmar la libranza pero no le llega el codigo otp, se validan datos se le indica que no tiene numero actualizado pero que valide todas las bandejas de entrada confirma que no hay nada se le solicita esperar un lapso de tiempo por si es un error de conexión',
                 'sms'                   => 1,
@@ -402,12 +402,12 @@ class DatabaseSeeder extends Seeder
         // -----------------------------
         // 10) SPECIAL CASES
         // -----------------------------
-        $existsAlianceSpecial = DB::table('aliance_special_cases')->where('id_messi', 'CTR-881585')->first();
-        if (! $existsAlianceSpecial) {
-            DB::table('aliance_special_cases')->insert([
+        $existsAlliesSpecial = DB::table('allies_special_cases')->where('id_messi', 'CTR-881585')->first();
+        if (! $existsAlliesSpecial) {
+            DB::table('allies_special_cases')->insert([
                 'user_id'          => $userIds[0] ?? 1,
-                'contact_id'       => $contactIdAliance,
-                'operator_entities_id' => $operatorEntityId,
+                'contact_id'       => $contactIdAllies,
+                'operator_entity_id' => $operatorEntityId,
                 'management_messi' => 'Nota Creada',
                 'id_call'          => '68b871ae742f0866f0010a1d',
                 'id_messi'         => 'CTR-881585',
