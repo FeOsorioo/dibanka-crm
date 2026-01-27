@@ -76,3 +76,16 @@ export const getActivePayrolls = async () => {
     const { data } = await api.get("/payrolls/active");
     return data.payrolls || [];
 };
+
+/* ===========================================================
+ *  ENTIDADES
+ * =========================================================== */
+
+/**
+ * Obtiene todas las entidades.
+ */
+export const getEntities = async () => {
+    const { data } = await api.get("/entities/active");
+    console.log(data);
+    return data.data;
+};

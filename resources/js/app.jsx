@@ -8,6 +8,7 @@ import RecoverPage from "@modules/auth/pages/RecoverPage";
 import Dashboard from "@modules/dashboard/pages/Dashboard";
 import Loader from "@components/ui/Loader";
 import Contact from "@modules/contact/pages/Contact";
+import Entity from "@modules/entity/pages/Entity";
 import Management from "@modules/management/pages/Management";
 import AddManagement from "@modules/management/pages/AddManagement";
 import SpecialCases from "@modules/specialCases/pages/SpecialCases";
@@ -60,6 +61,24 @@ const AppContent = () => {
                                             viewManagementContact="cuarto-paso"
                                             editContact="quinto-paso"
                                             activeOrDesactiveContact="sexto-paso"
+                                        />
+                                    </Layout>
+                                </ProtectedRoute>
+                            }
+                        />
+                        
+                        {/* Entidades */}
+                        <Route
+                            path="/entidades"
+                            element={
+                                <ProtectedRoute permission="contact.view">
+                                    <Layout id_management="septimo-paso">
+                                        <Entity
+                                            addEntity="segundo-paso"
+                                            searchEntity="tercer-paso"
+                                            viewManagementEntity="cuarto-paso"
+                                            editEntity="quinto-paso"
+                                            activeOrDesactiveEntity="sexto-paso"
                                         />
                                     </Layout>
                                 </ProtectedRoute>

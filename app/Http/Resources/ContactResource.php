@@ -40,6 +40,13 @@ class ContactResource extends JsonResource
                     'created_at' => $this->payroll->created_at?->format('Y-m-d H:i:s'),
                 ];
             }),
+            // Entidad relacionada
+            'entity' => $this->whenLoaded('entity', function () {
+                return [
+                    'id'    => $this->entity->id,
+                    'name'  => $this->entity->name,
+                ];
+            }),
             'name' => $this->name,
             'identification_type' => $this->identification_type,
             'identification_number' => $this->identification_number,

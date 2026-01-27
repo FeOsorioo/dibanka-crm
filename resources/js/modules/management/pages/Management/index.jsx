@@ -1,16 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { useContext, useState, useEffect } from "react";
-import { useCan } from "@hooks/useCan";
 import Drawer from "@mui/material/Drawer";
-import {
-    TextField,
-    FormControl,
-    Autocomplete,
-    Tabs,
-    Tab,
-    Box,
-} from "@mui/material";
+import { TextField, FormControl, Autocomplete, Box } from "@mui/material";
 import { useManagement } from "@modules/management/hooks/useManagement.js";
+import { useCan } from "@hooks/useCan";
 import TableSkeleton from "@components/tables/TableSkeleton";
 import Table from "@components/tables/Table";
 import ButtonAdd from "@components/ui/ButtonAdd";
@@ -20,6 +12,7 @@ import HistoryChanges from "@components/ui/HistoryChanges";
 
 const columns = [
     { header: "ID", key: "id" },
+    { header: "Campaña", key: "contact.campaign.name" },
     { header: "Agente", key: "user.name" },
     { header: "Pagaduría", key: "contact.payroll.name" },
     { header: "Nombre de cliente", key: "contact.name" },
@@ -40,7 +33,6 @@ const filterOptions = [
     { value: "consultation", label: "Consulta" },
     { value: "user", label: "Agente" },
     { value: "wolkvox_id", label: "Wolkvox_id" },
-    { value: "consultation", label: "Consulta" },
     { value: "specific", label: "Consulta Especifica" },
     { value: "type_management", label: "Tipo de gestión" },
     { value: "solution_date", label: "Fecha de solución" },
@@ -61,26 +53,6 @@ const P = ({ text1, text2 }) => {
         </p>
     );
 };
-
-function TabPanel({ children, value, index }) {
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`tab-panel-${index}`}
-            aria-labelledby={`tab-${index}`}
-        >
-            {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-        </div>
-    );
-}
-
-function a11yProps(index) {
-    return {
-        id: `tab-${index}`,
-        "aria-controls": `tab-panel-${index}`,
-    };
-}
 
 const Management = ({
     idView,
@@ -104,56 +76,33 @@ const Management = ({
         perPage,
         totalItems,
         fetchPage,
-        setCampaign,
-        campaign,
-        managementCountAliados,
-        managementCountAfiliados,
+        managementCount, // Total global
 
-        // Filtros Nuevo
+        // Filtros
         filters,
         addFilter,
         removeFilter,
         clearFilters,
 
-        // Historial Aliados
-        openHistoryAliados,
-        setOpenHistoryAliados,
-        historyAliados,
-        loadingHistoryAliados,
-        currentPageAliados,
-        totalPagesAliados,
-        perPageAliados,
-        totalItemsAliados,
-        handleOpenHistoryAliados,
-        fetchHistoryPageAliados,
+        // Historial
+        openHistory,
+        setOpenHistory,
+        history,
+        loadingHistory,
+        currentPageHistory,
+        totalPagesHistory,
+        perPageHistory,
+        totalItemsHistory,
+        handleOpenHistory,
+        fetchHistoryPage,
         selectedManagement,
-
-        //Historial Afiliados
-        openHistoryAfiliados,
-        setOpenHistoryAfiliados,
-        historyAfiliados,
-        loadingHistoryAfiliados,
-        currentPageAfiliados,
-        totalPagesAfiliados,
-        perPageAfiliados,
-        totalItemsAfiliados,
-        handleOpenHistoryAfiliados,
-        fetchHistoryPageAfiliados,
     } = useManagement();
 
     const { can } = useCan();
     const navigate = useNavigate();
 
-    const [tabValue, setTabValue] = useState(campaign === "Aliados" ? 0 : 1);
-
-    useEffect(() => {
-        setTabValue(campaign === "Aliados" ? 0 : 1);
-    }, [campaign]);
-
-    const handleTabChange = (_, newValue) => {
-        setTabValue(newValue);
-        setCampaign(newValue === 0 ? "Aliados" : "Afiliados");
-    };
+    // Data activa
+    const activeData = management || [];
 
     const handleView = (item) => {
         setFormData(item);
@@ -169,32 +118,14 @@ const Management = ({
         setOnMonitoring(true);
     };
 
-    const activeData = management || [];
-
     return (
         <>
-            {/* Tabs con totales separados */}
-            <Box sx={{ width: "100%", mb: 4, margin: "auto" }}>
-                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <Tabs
-                        value={tabValue}
-                        onChange={handleTabChange}
-                        centered
-                        aria-label="gestiones tabs"
-                    >
-                        <Tab
-                            label={`Gestiones de Aliados (${managementCountAliados})`}
-                            {...a11yProps(0)}
-                        />
-                        <Tab
-                            label={`Gestiones de Afiliados (${managementCountAfiliados})`}
-                            {...a11yProps(1)}
-                        />
-                    </Tabs>
-                </Box>
-
-                {/* Tab Panel - Aliados */}
-                <TabPanel value={tabValue} index={0}>
+            <Box sx={{ width: "100%", mb: 4, margin: "auto", px: 2 }}>
+                {/* Header y Botón Agregar */}
+                <div className="flex justify-between items-center mt-6 mb-4">
+                    <h1 className="text-2xl font-bold text-purple-mid">
+                        Gestiones ({totalItems})
+                    </h1>
                     {can("management.create") && (
                         <ButtonAdd
                             id={idAddManagement}
@@ -202,137 +133,66 @@ const Management = ({
                                 navigate(
                                     `/gestiones/añadir?identification_number=${
                                         filters.identification_number || ""
-                                    }`
+                                    }`,
                                 );
                             }}
                             text="Agregar Gestión"
                         />
                     )}
+                </div>
 
-                    <div className="flex justify-end px-12 mb-4 gap-2 -mt-10">
-                        <MultiFilter
-                            onAddFilter={addFilter}
-                            onRemoveFilter={removeFilter}
-                            onClearFilters={clearFilters}
-                            filters={filters}
-                            options={filterOptions}
-                            className="w-full max-w-2xl"
-                        />
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
-                        Lista de gestiones - Aliados
-                    </h1>
-
-                    {loading ? (
-                        <TableSkeleton rows={11} />
-                    ) : (
-                        <Table
-                            width="90%"
-                            columns={columns}
-                            data={activeData}
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            rowsPerPage={perPage}
-                            totalItems={totalItems}
-                            fetchPage={fetchPage}
-                            actions={true}
-                            history={true}
-                            onHistory={(item) => handleOpenHistoryAliados(item)}
-                            view={true}
-                            onView={(item) => handleView(item)}
-                            edit={false}
-                            monitoring={true}
-                            onMonitoring={(item) => handleMonitoring(item)}
-                            onActiveOrInactive={false}
-                            idView={idView}
-                            idMonitoring={idMonitoring}
-                        />
-                    )}
-
-                    <HistoryChanges
-                        isOpen={openHistoryAliados}
-                        onClose={() => setOpenHistoryAliados(false)}
-                        contact={selectedManagement}
-                        history={historyAliados}
-                        loading={loadingHistoryAliados}
-                        currentPage={currentPageAliados}
-                        totalPages={totalPagesAliados}
-                        totalItems={totalItemsAliados}
-                        perPage={perPageAliados}
-                        onPageChange={fetchHistoryPageAliados}
+                {/* Filtros */}
+                <div className="flex justify-end mb-4 gap-2">
+                    <MultiFilter
+                        onAddFilter={addFilter}
+                        onRemoveFilter={removeFilter}
+                        onClearFilters={clearFilters}
+                        filters={filters}
+                        options={filterOptions}
+                        className="w-full max-w-2xl"
                     />
-                </TabPanel>
+                </div>
 
-                {/* Tab Panel - Afiliados */}
-                <TabPanel value={tabValue} index={1}>
-                    {can("management.create") && (
-                        <ButtonAdd
-                            id={idAddManagement}
-                            onClickButtonAdd={() => {
-                                navigate(
-                                    `/gestiones/añadir?identification_number=${
-                                        filters.identification_number || ""
-                                    }`
-                                );
-                            }}
-                            text="Agregar Gestión"
-                        />
-                    )}
-                    <div className="flex justify-end px-12 mb-4 gap-2 -mt-10">
-                        <MultiFilter
-                            onAddFilter={addFilter}
-                            onRemoveFilter={removeFilter}
-                            onClearFilters={clearFilters}
-                            filters={filters}
-                            options={filterOptions}
-                            className="w-full max-w-2xl"
-                        />
-                    </div>
-
-                    <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
-                        Lista de gestiones - Afiliados
-                    </h1>
-
-                    {loading ? (
-                        <TableSkeleton rows={columns.length} />
-                    ) : (
-                        <Table
-                            columns={columns}
-                            data={activeData}
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            rowsPerPage={perPage}
-                            totalItems={totalItems}
-                            fetchPage={fetchPage}
-                            actions={true}
-                            history={true}
-                            onHistory={(item) =>
-                                handleOpenHistoryAfiliados(item)
-                            }
-                            view={true}
-                            onView={(item) => handleView(item)}
-                            edit={false}
-                            monitoring={true}
-                            onMonitoring={(item) => handleMonitoring(item)}
-                            onActiveOrInactive={false}
-                            idView={idView}
-                            idMonitoring={idMonitoring}
-                        />
-                    )}
-                    <HistoryChanges
-                        isOpen={openHistoryAfiliados}
-                        onClose={() => setOpenHistoryAfiliados(false)}
-                        contact={selectedManagement}
-                        history={historyAfiliados}
-                        loading={loadingHistoryAfiliados}
-                        currentPage={currentPageAfiliados}
-                        totalPages={totalPagesAfiliados}
-                        totalItems={totalItemsAfiliados}
-                        perPage={perPageAfiliados}
-                        onPageChange={fetchHistoryPageAfiliados}
+                {/* Tabla Unificada */}
+                {loading ? (
+                    <TableSkeleton rows={11} />
+                ) : (
+                    <Table
+                        width="100%"
+                        columns={columns}
+                        data={activeData}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        rowsPerPage={perPage}
+                        totalItems={totalItems}
+                        fetchPage={fetchPage}
+                        actions={true}
+                        history={true}
+                        onHistory={(item) => handleOpenHistory(item)}
+                        view={true}
+                        onView={(item) => handleView(item)}
+                        edit={false}
+                        monitoring={true}
+                        onMonitoring={(item) => handleMonitoring(item)}
+                        onActiveOrInactive={false}
+                        idView={idView}
+                        idMonitoring={idMonitoring}
                     />
-                </TabPanel>
+                )}
+
+                {/* Historial */}
+                <HistoryChanges
+                    isOpen={openHistory}
+                    onClose={() => setOpenHistory(false)}
+                    contact={selectedManagement}
+                    history={history}
+                    loading={loadingHistory}
+                    currentPage={currentPageHistory}
+                    totalPages={totalPagesHistory}
+                    totalItems={totalItemsHistory}
+                    perPage={perPageHistory}
+                    onPageChange={fetchHistoryPage}
+                />
             </Box>
 
             {/* Drawer de Vista */}
@@ -372,7 +232,7 @@ const Management = ({
                             }
                         />
                         <P
-                            text1="Campaña: "
+                            text1="Campaña del contacto: "
                             text2={formData.contact?.campaign ?? "Sin campaña"}
                         />
                     </div>
@@ -518,7 +378,7 @@ const Management = ({
                                 getOptionLabel={(option) => option.name}
                                 value={
                                     monitoring?.find(
-                                        (m) => m.id === formData.monitoring_id
+                                        (m) => m.id === formData.monitoring_id,
                                     ) || null
                                 }
                                 onChange={(event, newValue) => {

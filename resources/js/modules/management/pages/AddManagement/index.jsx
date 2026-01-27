@@ -31,7 +31,6 @@ import { LuUserPen } from "react-icons/lu";
 
 const AddManagement = () => {
     const {
-        campaign,
         sms,
         wsp,
         selectedPayroll,
@@ -46,7 +45,7 @@ const AddManagement = () => {
         validationErrors,
         loadingConsultations,
         payroll,
-        setCampaign,
+        // Setters
         setSms,
         setWsp,
         setSelectedPayroll,
@@ -95,12 +94,11 @@ const AddManagement = () => {
         });
     }, [payroll]);
 
-    // 🔥 FIX: Callback para cuando se seleccione un contacto en el modal
+    // Callback para cuando se seleccione un contacto en el modal
     const handleContactSelectedFromModal = (contact) => {
         setSelectedContact(contact);
     };
 
-    // 🔥 FIX: Renombrar las props para evitar conflictos de nombres
     const {
         user,
         onSelectContact,
@@ -128,7 +126,7 @@ const AddManagement = () => {
 
     const parsedDescription = selectedContact?.payroll?.description?.replace(
         /{{agente}}/g,
-        user?.name || ""
+        user?.name || "",
     );
 
     const handleOpenInfoPopup = () => {
@@ -137,7 +135,7 @@ const AddManagement = () => {
         window.open(
             `/informacion?payroll_id=${encodeURIComponent(payrollId)}`,
             "_blank",
-            "width=1000,height=700,scrollbars=yes,resizable=yes"
+            "width=1000,height=700,scrollbars=yes,resizable=yes",
         );
     };
 
@@ -212,7 +210,9 @@ const AddManagement = () => {
                                         className="flex-1"
                                     />
                                     <button
-                                        onClick={() => setOpenSearchContact(true)}  
+                                        onClick={() =>
+                                            setOpenSearchContact(true)
+                                        }
                                         className="px-5 bg-blue-50 hover:bg-blue-100 border-l border-gray-300 transition-all duration-200 group"
                                     >
                                         <IoMdSearch className="text-blue-600 w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -351,7 +351,7 @@ const AddManagement = () => {
                                                                 e.target.value,
                                                         });
                                                         clearValidationError(
-                                                            field.name
+                                                            field.name,
                                                         );
                                                     }}
                                                 >
@@ -365,7 +365,7 @@ const AddManagement = () => {
                                                             >
                                                                 {opt.label}
                                                             </MenuItem>
-                                                        )
+                                                        ),
                                                     )}
                                                 </Select>
                                                 {validationErrors[
@@ -409,7 +409,7 @@ const AddManagement = () => {
                                                             e.target.value,
                                                     });
                                                     clearValidationError(
-                                                        field.name
+                                                        field.name,
                                                     );
                                                 }}
                                             />
@@ -474,7 +474,7 @@ const AddManagement = () => {
                 {/* Autocompletado de Tipo de gestión */}
                 <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-100 flex flex-col gap-3">
                     <h2 className="text-2xl font-bold text-gray-800">
-                        Tipo de gestión
+                        Tipo de gestión 
                     </h2>
                     <Autocomplete
                         disabled={!selectedContact}
@@ -488,14 +488,15 @@ const AddManagement = () => {
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                label="Tipo de gesiton"
+                                label="Tipo de gestion"
                                 error={!!validationErrors.type_management_id}
                                 helperText={
-                                    !campaign
+                                    !selectedContact
                                         ? "Selecciona un contacto primero"
                                         : validationErrors.type_management_id
-                                        ? validationErrors.type_management_id[0]
-                                        : ""
+                                          ? validationErrors
+                                                .type_management_id[0]
+                                          : ""
                                 }
                             />
                         )}
@@ -529,11 +530,11 @@ const AddManagement = () => {
                             </FormHelperText>
                         )}
                         <FormHelperText>
-                            {!campaign
+                            {!selectedContact
                                 ? "Selecciona un contacto primero"
                                 : validationErrors.solution
-                                ? validationErrors.solution[0]
-                                : ""}
+                                  ? validationErrors.solution[0]
+                                  : ""}
                         </FormHelperText>
                     </FormControl>
                 </div>
@@ -563,11 +564,11 @@ const AddManagement = () => {
                                 label="Consulta"
                                 error={!!validationErrors.consultation_id}
                                 helperText={
-                                    !campaign
+                                    !selectedContact
                                         ? "Selecciona un contacto primero"
                                         : validationErrors.consultation_id
-                                        ? validationErrors.consultation_id[0]
-                                        : ""
+                                          ? validationErrors.consultation_id[0]
+                                          : ""
                                 }
                                 InputProps={{
                                     ...params.InputProps,
@@ -594,7 +595,7 @@ const AddManagement = () => {
                         options={filteredSpecific}
                         getOptionLabel={(option, index) => {
                             const pos = filteredSpecific.findIndex(
-                                (o) => o.id === option.id
+                                (o) => o.id === option.id,
                             );
                             const numero = pos + 1;
                             return `${
@@ -606,22 +607,18 @@ const AddManagement = () => {
                             setSelectedSpecificConsultation(value);
                             clearValidationError("specific_id");
                         }}
-                        disabled={
-                            !selectedContact ||
-                            !campaign ||
-                            loadingConsultations
-                        }
+                        disabled={!selectedContact || loadingConsultations}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
                                 label="Consulta específica"
                                 error={!!validationErrors.specific_id}
                                 helperText={
-                                    !campaign
+                                    !selectedContact
                                         ? "Selecciona un contacto primero"
                                         : validationErrors.consultation_id
-                                        ? validationErrors.consultation_id[0]
-                                        : ""
+                                          ? validationErrors.consultation_id[0]
+                                          : ""
                                 }
                                 InputProps={{
                                     ...params.InputProps,

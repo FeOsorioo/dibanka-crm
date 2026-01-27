@@ -8,7 +8,7 @@ import {
 import { useManagementStaticData } from "@modules/management/context/ManagementStaticDataContext";
 import { useDebounce } from "@modules/management/hooks/useDebounce";
 
-export const useAddManagement = (selectedPayroll = null, campaign = "") => {
+export const useAddManagement = (selectedPayroll = null) => {
     // Usar datos estáticos del contexto compartido
     const {
         payroll,
@@ -28,7 +28,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Contactos
+    // Contactos (Estado local para el buscador)
     const [currentPageContact, setCurrentPageContact] = useState(1);
     const [totalPagesContact, setTotalPagesContact] = useState(1);
     const [searchTermContact, setSearchTermContact] = useState("");
@@ -40,14 +40,14 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
     const [view, setView] = useState(false);
     const [modal, setModal] = useState(false);
 
-    // Debounce para búsqueda de contactos (optimización)
+    // Debounce para búsqueda de contactos
     const debouncedSearchContact = useDebounce(searchTermContact, 500);
 
     // Refs para evitar loops
     const isFetchingContacts = useRef(false);
 
     /* ===========================================================
-     *  FETCH GESTIONES (solo cuando se necesita)
+     *  FETCH GESTIONES
      * =========================================================== */
     const fetchManagement = useCallback(async (page = 1, search = "") => {
         try {
@@ -62,10 +62,10 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
     }, []);
 
     /* ===========================================================
-     *  FETCH CONTACTOS (optimizado con debounce)
+     *  FETCH CONTACTOS
      * =========================================================== */
     const fetchContacts = useCallback(async (page = 1, search = "") => {
-        if (isFetchingContacts.current) return; // Evitar peticiones simultáneas
+        if (isFetchingContacts.current) return;
 
         isFetchingContacts.current = true;
         try {
@@ -75,7 +75,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
             setTotalPagesContact(
                 contactData.pagination?.total_pages ||
                     contactData.pagination?.last_page ||
-                    1
+                    1,
             );
             setPerPageContact(contactData.pagination?.per_page || 10);
             setTotalItemsContact(contactData.pagination?.total_contacts || 0);
@@ -86,7 +86,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
         }
     }, []);
 
-    // Cargar contactos solo cuando cambie la página o búsqueda (con debounce)
+    // Cargar contactos
     useEffect(() => {
         fetchContacts(currentPageContact, debouncedSearchContact);
     }, [currentPageContact, debouncedSearchContact, fetchContacts]);
@@ -99,9 +99,8 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
             setLoading(true);
             setValidationErrors({});
             try {
-                // Pasar la campaña al servicio
-                //console.log('🔍 useAddManagement - handleSubmit recibió campaign:', campaign);
-                await saveManagement(payload, campaign);
+                // Ya no pasamos campaña, usamos el endpoint unificado
+                await saveManagement(payload);
 
                 Swal.fire({
                     title: "Gestión guardada",
@@ -132,7 +131,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
                 setLoading(false);
             }
         },
-        [currentPage, searchTerm, fetchManagement, campaign]
+        [currentPage, searchTerm, fetchManagement],
     );
 
     /* ===========================================================
@@ -142,7 +141,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
         (page) => {
             fetchManagement(page, searchTerm);
         },
-        [searchTerm, fetchManagement]
+        [searchTerm, fetchManagement],
     );
 
     const handleSearch = useCallback((value) => {
@@ -156,7 +155,7 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
 
     const handleSearchContact = useCallback((value) => {
         setSearchTermContact(value);
-        setCurrentPageContact(1); // Resetear a página 1 cuando se busca
+        setCurrentPageContact(1);
     }, []);
 
     const clearValidationError = useCallback((field) => {
@@ -172,13 +171,10 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
      * =========================================================== */
     const values = useMemo(
         () => ({
-            // Datos
             management,
             payroll,
             typeManagement,
             contact,
-
-            // Estados (combinar loading estático con loading local)
             loading: loading || staticDataLoading,
             error,
             view,
@@ -187,7 +183,6 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
             validationErrors,
             totalPages,
             currentPage,
-
             // Acciones
             setView,
             setModal,
@@ -199,7 +194,6 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
             handleSearch,
             handleSubmit,
             clearValidationError,
-
             // Contactos
             currentPageContact,
             totalPagesContact,
@@ -234,8 +228,8 @@ export const useAddManagement = (selectedPayroll = null, campaign = "") => {
             clearValidationError,
             fetchPageContact,
             handleSearchContact,
-            searchTermContact, // Exponer término de búsqueda
-        ]
+            searchTermContact,
+        ],
     );
 
     return values;

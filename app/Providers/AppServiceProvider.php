@@ -4,13 +4,13 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Observers\ContactObserver;
-use App\Observers\ManagementAliadoObserver;
-use App\Observers\ManagementAfiliadoObserver;
+use App\Observers\ManagementObserver;
 use App\Observers\SpecialCaseObserver;
+use App\Observers\EntityObserver;
 use App\Models\Contact;
-use App\Models\Aliados\Management as ManagementAliados;
-use App\Models\Afiliados\Management as ManagementAfiliados;
+use App\Models\Management;
 use App\Models\SpecialCases;
+use App\Models\Entity;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,8 +27,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Contact::observe(ContactObserver::class);
-        ManagementAliados::observe(ManagementAliadoObserver::class);
-        ManagementAfiliados::observe(ManagementAfiliadoObserver::class);
+        Management::observe(ManagementObserver::class);
         SpecialCases::observe(SpecialCaseObserver::class);
+        Entity::observe(EntityObserver::class);
     }
 }

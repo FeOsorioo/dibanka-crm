@@ -1,15 +1,12 @@
 import { useState } from "react";
 import Table from "@components/tables/Table";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import ButtonAdd from "@components/ui/ButtonAdd";
 import FormAdd from "@components/forms/FormAdd";
 import TableSkeleton from "@components/tables/TableSkeleton";
 import Search from "@components/forms/Search";
 import StatCard from "@components/ui/StatCard";
-import { useConsultsAliados } from "@modules/config/Consultation/hooks/useConsultsAliados";
-import { useConsultsAfiliados } from "@modules/config/Consultation/hooks/useConsultsAfiliados";
+import { useConsultations } from "@modules/config/Consultation/hooks/useConsultations";
 import * as yup from "yup";
 
 /* ===========================================================
@@ -64,47 +61,10 @@ const columns = [
 ];
 
 /* ===========================================================
- *  TAB PANEL (JSX friendly)
- * =========================================================== */
-function TabPanel({ children, value, index }) {
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`tab-panel-${index}`}
-            aria-labelledby={`tab-${index}`}
-        >
-            {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-        </div>
-    );
-}
-
-function a11yProps(index) {
-    return {
-        id: `tab-${index}`,
-        "aria-controls": `tab-panel-${index}`,
-    };
-}
-
-/* ===========================================================
  *  COMPONENTE PRINCIPAL
  * =========================================================== */
 const Consultation = () => {
-    // Hook independiente para Aliados
-    const aliadosHook = useConsultsAliados();
-
-    // Hook independiente para Afiliados
-    const afiliadosHook = useConsultsAfiliados();
-
-    const [value, setValue] = useState(0);
-
-    const handleChange = (_, newValue) => {
-        setValue(newValue);
-    };
-
-    // Seleccionar el hook activo según el tab
-    const activeHook = value === 0 ? aliadosHook : afiliadosHook;
-
+    // Hook unificado para Consultas
     const {
         consultations,
         payroll,
@@ -125,14 +85,15 @@ const Consultation = () => {
         fetchPage,
         handleCloseModal,
         active,
-        inactive
-    } = activeHook;
+        inactive,
+    } = useConsultations();
 
     const statsCards = [
         { title: "Consultas Totales", value: totalItems },
         { title: "Consultas Activas", value: active },
         { title: "Consultas Inactivas", value: inactive },
     ];
+
     return (
         <>
             {/* Cards */}
@@ -142,7 +103,6 @@ const Consultation = () => {
                 ))}
             </div>
 
-            {/* Tabs */}
             <Box
                 sx={{
                     width: "90%",
@@ -151,148 +111,69 @@ const Consultation = () => {
                     margin: "auto",
                 }}
             >
-                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <Tabs
-                        value={value}
-                        onChange={handleChange}
-                        centered
-                        aria-label="basic tabs example"
-                    >
-                        <Tab label="Consultas de Aliados" {...a11yProps(0)} />
-                        <Tab label="Consultas de Afiliados" {...a11yProps(1)} />
-                    </Tabs>
-                </Box>
+                {/* Botón + */}
+                <ButtonAdd
+                    onClickButtonAdd={() => {
+                        setFormData({
+                            id: null,
+                            name: "",
+                            payroll_ids: [],
+                            is_active: true,
+                        });
+                        setIsOpenADD(true);
+                    }}
+                    text="Agregar consulta"
+                />
 
-                <TabPanel value={value} index={0}>
-                    {/* Botón + */}
-                    <ButtonAdd
-                        onClickButtonAdd={() => {
-                            setFormData({
-                                id: null,
-                                name: "",
-                                payroll_ids: [],
-                                is_active: true,
-                            });
-                            setIsOpenADD(true);
-                        }}
-                        text="Agregar consulta"
+                {/* Buscador */}
+                <div className="flex justify-end px-12 -mt-10">
+                    <Search
+                        onSearch={handleSearch}
+                        placeholder="Buscar consulta..."
                     />
+                </div>
 
-                    {/* Buscador */}
-                    <div className="flex justify-end px-12 -mt-10">
-                        <Search
-                            onSearch={handleSearch}
-                            placeholder="Buscar consulta..."
-                        />
-                    </div>
-
-                    {/* Modal */}
-                    <FormAdd
-                        isOpen={isOpenADD}
-                        setIsOpen={handleCloseModal}
-                        title="Consultas de Aliados"
-                        formData={formData}
-                        setFormData={setFormData}
-                        handleSubmit={handleSubmit}
-                        loading={loading}
-                        validationErrors={validationErrors}
-                        fields={fields.map((f) =>
-                            f.name === "payroll_ids"
-                                ? {
-                                      ...f,
-                                      options: payroll.map((p) => ({
-                                          value: p.id,
-                                          label: p.name,
-                                      })),
-                                  }
-                                : f
-                        )}
-                        schema={consultSchema}
-                    />
-
-                    {/* Tabla */}
-                    {loading ? (
-                        <TableSkeleton rows={4} />
-                    ) : (
-                        <Table
-                            columns={columns}
-                            data={consultations}
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            rowsPerPage={perPage}
-                            totalItems={totalItems}
-                            fetchPage={(page) => fetchPage(page)}
-                            onDelete={handleDelete}
-                            actions
-                            onEdit={handleEdit}
-                        />
+                {/* Modal */}
+                <FormAdd
+                    isOpen={isOpenADD}
+                    setIsOpen={handleCloseModal}
+                    title="Consultas"
+                    formData={formData}
+                    setFormData={setFormData}
+                    handleSubmit={handleSubmit}
+                    loading={loading}
+                    validationErrors={validationErrors}
+                    fields={fields.map((f) =>
+                        f.name === "payroll_ids"
+                            ? {
+                                  ...f,
+                                  options: payroll.map((p) => ({
+                                      value: p.id,
+                                      label: p.name,
+                                  })),
+                              }
+                            : f,
                     )}
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    {/* Botón + */}
-                    <ButtonAdd
-                        onClickButtonAdd={() => {
-                            setFormData({
-                                id: null,
-                                name: "",
-                                payroll_ids: [],
-                                is_active: true,
-                            });
-                            setIsOpenADD(true);
-                        }}
-                        text="Agregar Consulta"
+                    schema={consultSchema}
+                />
+
+                {/* Tabla */}
+                {loading ? (
+                    <TableSkeleton rows={4} />
+                ) : (
+                    <Table
+                        columns={columns}
+                        data={consultations}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        rowsPerPage={perPage}
+                        totalItems={totalItems}
+                        fetchPage={(page) => fetchPage(page)}
+                        onDelete={handleDelete}
+                        actions
+                        onEdit={handleEdit}
                     />
-
-                    {/* Buscador */}
-                    <div className="flex justify-end px-12 -mt-10">
-                        <Search
-                            onSearch={handleSearch}
-                            placeholder="Buscar consulta..."
-                        />
-                    </div>
-
-                    {/* Modal */}
-                    <FormAdd
-                        isOpen={isOpenADD}
-                        setIsOpen={handleCloseModal}
-                        title="Consultas de Afiliados"
-                        formData={formData}
-                        setFormData={setFormData}
-                        handleSubmit={handleSubmit}
-                        loading={loading}
-                        validationErrors={validationErrors}
-                        fields={fields.map((f) =>
-                            f.name === "payroll_ids"
-                                ? {
-                                      ...f,
-                                      options: payroll.map((p) => ({
-                                          value: p.id,
-                                          label: p.name,
-                                      })),
-                                  }
-                                : f
-                        )}
-                        schema={consultSchema}
-                    />
-
-                    {/* Tabla */}
-                    {loading ? (
-                        <TableSkeleton rows={4} />
-                    ) : (
-                        <Table
-                            columns={columns}
-                            data={consultations}
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            rowsPerPage={perPage}
-                            totalItems={totalItems}
-                            fetchPage={(page) => fetchPage(page)}
-                            onDelete={handleDelete}
-                            actions
-                            onEdit={handleEdit}
-                        />
-                    )}
-                </TabPanel>
+                )}
             </Box>
         </>
     );

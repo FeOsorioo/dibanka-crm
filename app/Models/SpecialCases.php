@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class SpecialCases extends Model
 {
-    protected $fillable = ['user_id', 'contact_id', 'management_messi', 'id_call', 'id_messi', 'observations'];
+    protected $fillable = [
+        'user_id', 
+        'contact_id', 
+        'management_messi', 
+        'id_call', 
+        'id_messi', 
+        'observations'
+    ];
 
     // Relación con usuarios
     public function user()

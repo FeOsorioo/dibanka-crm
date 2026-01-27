@@ -172,11 +172,7 @@ class PayrollController extends Controller
             
             // Si se está desactivando, eliminar las relaciones
             if ($state) { // Si estaba activa (true) y se va a desactivar
-                DB::table('payroll_consultations_aliados')
-                    ->where('payroll_id', $id)
-                    ->delete();
-                
-                DB::table('payroll_consultations_afiliados')
+                DB::table('payroll_consultations')
                     ->where('payroll_id', $id)
                     ->delete();
             }

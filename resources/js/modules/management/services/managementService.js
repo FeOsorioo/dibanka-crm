@@ -7,26 +7,13 @@ import api from "@api/axios";
 /**
  * Obtiene la lista de gestiones con paginación, búsqueda y filtro por columna.
  * @param {number} page
- * @param {string} search - Término de búsqueda
- * @param {string} campaign - "Aliados" o "Afiliados"
- * @param {string} filterColumn - Columna específica para filtrar (opcional)
+ * @param {object} filters - Filtros dinámicos
  */
-export const getManagements = async (
-    page = 1,
-    filters = {},
-    campaign = "Aliados"
-) => {
-    const campaignLower = campaign.toLowerCase();
-    let endpoint = "/management-aliados"; // Default
-
-    if (campaignLower === "afiliados") {
-        endpoint = "/management-afiliados";
-    }
-
+export const getManagements = async (page = 1, filters = {}) => {
+    const endpoint = "/management";
     const params = new URLSearchParams({ page });
 
     // Agregar filtros dinámicos a la URL
-    // Si filters viene como string (legacy search), lo manejamos
     if (typeof filters === "string") {
         if (filters) params.append("search", filters);
     } else {
@@ -54,34 +41,20 @@ export const getManagements = async (
 };
 
 /**
- * Crea una nueva gestión según la campaña seleccionada.
- * Para actualizaciones (con id), usa el endpoint estándar.
- * Para creaciones, usa endpoints específicos por campaña.
- *
+ * Crea o actualiza una gestión.
  * @param {Object} payload - Datos de la gestión
- * @param {string} campaign - "Aliados" o "Afiliados"
  */
-export const saveManagement = async (payload, campaign = "") => {
+export const saveManagement = async (payload) => {
     const { id } = payload;
 
-    // Si tiene ID, es una actualización (usar endpoint estándar)
     if (id) {
+        // Actualizar
         const { data } = await api.put(`/management/${id}`, payload);
         return data;
     }
 
-    // Para nuevas gestiones, determinar endpoint según campaña
-    const campaignLower = campaign.toLowerCase();
-    let endpoint = "/management-aliados"; // Por defecto Aliados
-
-    if (campaignLower == "afiliados") {
-        endpoint = "/management-afiliados";
-    }
-
-    //console.log(`🎯 Creando gestión en: ${endpoint} (Campaña: "${campaign}")`);
-    //console.log('📊 Tipo de campaign:', typeof campaign, 'Valor:', campaign);
-
-    const { data } = await api.post(endpoint, payload);
+    // Crear
+    const { data } = await api.post("/management", payload);
     return data;
 };
 
@@ -90,7 +63,6 @@ export const saveManagement = async (payload, campaign = "") => {
  */
 export const getActiveTypeManagements = async () => {
     const { data } = await api.get("/config/typemanagements/active");
-    console.log("🚀 typeManagement:", data);
     return data.typeManagement || [];
 };
 
@@ -98,45 +70,24 @@ export const getActiveTypeManagements = async () => {
  * Actualiza los campos solution_date y monitoring_id de una gestión.
  * @param {number} id
  * @param {Object} payload
- * @param {string} campaign - "Aliados" o "Afiliados"
  */
-export const updateManagementMonitoring = async (
-    id,
-    payload,
-    campaign = "Aliados"
-) => {
-    const campaignLower = campaign.toLowerCase();
-    let endpoint = `/managementmonitoring-aliados/${id}`; // Default
-
-    if (campaignLower === "afiliados") {
-        endpoint = `/managementmonitoring-afiliados/${id}`;
-    }
-
+export const updateManagementMonitoring = async (id, payload) => {
+    const endpoint = `/managementmonitoring/${id}`;
     const { data } = await api.put(endpoint, payload);
     return data;
 };
 
 /* ===========================================================
- *  CONSULTAS - DINÁMICAS POR CAMPAÑA
+ *  CONSULTAS
  * =========================================================== */
 
 /**
- * Consultas activas según la campaña.
- * @param {string} campaign - "aliados" o "afiliados"
+ * Consultas activas.
  * @param {number} payrollId - ID de la pagaduría (opcional)
  */
-export const getActiveConsultationsByCampaign = async (
-    campaign = "",
-    payrollId = null
-) => {
-    if (!campaign) {
-        return [];
-    }
+export const getActiveConsultations = async (payrollId = null) => {
+    let endpoint = "/config/consultations/active";
 
-    const campaignLower = campaign.toLowerCase();
-    let endpoint = `/config/consultations-${campaignLower}/active`;
-
-    // Agregar filtro de pagaduría si está presente
     if (payrollId) {
         endpoint += `?payroll_id=${payrollId}`;
     }
@@ -145,28 +96,18 @@ export const getActiveConsultationsByCampaign = async (
         const { data } = await api.get(endpoint);
         return data.consultations || [];
     } catch (error) {
-        console.error(`Error al obtener consultas de ${campaign}:`, error);
+        console.error("Error al obtener consultas:", error);
         return [];
     }
 };
 
 /**
- * Consultas específicas activas según la campaña.
- * @param {string} campaign - "aliados" o "afiliados"
+ * Consultas específicas activas.
  * @param {number} consultationId - ID de la consulta (opcional)
  */
-export const getActiveSpecificConsultationsByCampaign = async (
-    campaign = "",
-    consultationId = null
-) => {
-    if (!campaign) {
-        return [];
-    }
+export const getActiveSpecificConsultations = async (consultationId = null) => {
+    let endpoint = "/config/specifics/active";
 
-    const campaignLower = campaign.toLowerCase();
-    let endpoint = `/config/consultationspecifics-${campaignLower}/active`;
-
-    // Agregar filtro de consulta si está presente
     if (consultationId) {
         endpoint += `?consultation_id=${consultationId}`;
     }
@@ -175,10 +116,7 @@ export const getActiveSpecificConsultationsByCampaign = async (
         const { data } = await api.get(endpoint);
         return data.consultationspecific || [];
     } catch (error) {
-        console.error(
-            `Error al obtener consultas específicas de ${campaign}:`,
-            error
-        );
+        console.error("Error al obtener consultas específicas:", error);
         return [];
     }
 };
@@ -196,23 +134,15 @@ export const getActiveMonitorings = async () => {
 };
 
 /* ===========================================================
- *  CONTEO DE GESTIONES ALIADOS Y AFILIADOS
+ *  CONTEO DE GESTIONES
  * =========================================================== */
 
 /**
- * Obtiene todos los conteos de gestiones activos.
+ * Obtiene el conteo total de gestiones.
  */
-export const getCountManagementsAliados = async () => {
-    const { data } = await api.get("/management-aliados/count");
-    return data.count || [];
-};
-
-/**
- * Obtiene todos los conteos de gestiones activos.
- */
-export const getCountManagementsAfiliados = async () => {
-    const { data } = await api.get("/management-afiliados/count");
-    return data.count || [];
+export const getCountManagements = async () => {
+    const { data } = await api.get("/management/count");
+    return data.count || 0;
 };
 
 /* ===========================================================
@@ -229,21 +159,15 @@ export const getActivePayrolls = async () => {
 
 /**
  * Contactos con filtro por columna.
- * @param {number} page - Número de página
- * @param {string} search - Término de búsqueda
- * @param {string} filterColumn - Columna específica para filtrar (opcional)
  */
 export const getContacts = async (page = 1, search = "", filterColumn = "") => {
     let url = `/contacts/active?page=${page}`;
 
-    // Si hay un filtro por columna específica
     if (filterColumn && search) {
         url += `&searchValue=${encodeURIComponent(
-            search
+            search,
         )}&filterColumn=${filterColumn}`;
-    }
-    // Si no hay filtro específico, usar búsqueda general
-    else if (search) {
+    } else if (search) {
         url += `&search=${encodeURIComponent(search)}`;
     }
 
@@ -268,25 +192,13 @@ export const sendWhatsApp = async (payload) => {
 };
 
 /**
- * Obtiene el historial de cambios de una gestión de aliados.
- * @param {number} id - ID de la gestión
+ * Obtiene el historial de cambios de una gestión.
+ * @param {number} managementId - ID de la gestión
  * @param {number} page - Número de página
  */
-export const getHistoryChangesAliados = async (managementId, page = 1) => {
+export const getHistoryChanges = async (managementId, page = 1) => {
     const { data } = await api.get(
-        `/change-histories/entity/aliados-management/${managementId}?page=${page}`
-    );
-    return data;
-};
-
-/**
- * Obtiene el historial de cambios de una gestión de afiliados.
- * @param {number} id - ID de la gestión
- * @param {number} page - Número de página
- */
-export const getHistoryChangesAfiliados = async (managementId, page = 1) => {
-    const { data } = await api.get(
-        `/change-histories/entity/afiliados-management/${managementId}?page=${page}`
+        `/change-histories/entity/management/${managementId}?page=${page}`,
     );
     return data;
 };

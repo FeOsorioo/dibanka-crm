@@ -5,8 +5,8 @@ import { useAddManagement } from "@modules/management/hooks/useAddManagement";
 import {
     sendSms,
     sendWhatsApp,
-    getActiveConsultationsByCampaign,
-    getActiveSpecificConsultationsByCampaign,
+    getActiveConsultations,
+    getActiveSpecificConsultations,
 } from "@modules/management/services/managementService";
 import {
     createContact,
@@ -24,7 +24,6 @@ export const useAddManagementForm = () => {
     // ==========================
     // ESTADOS LOCALES
     // ==========================
-    const [campaign, setCampaign] = useState("");
     const [sms, setSms] = useState(false);
     const [wsp, setWsp] = useState(false);
     const [selectedPayroll, setSelectedPayroll] = useState(null);
@@ -53,37 +52,27 @@ export const useAddManagementForm = () => {
         validationErrors,
         clearValidationError,
         setValidationErrors,
-    } = useAddManagement(selectedPayroll, campaign);
+    } = useAddManagement(selectedPayroll);
 
     // ==========================
-    // CARGAR CONSULTAS SEGÚN CAMPAÑA Y PAGADURÍA
-    // ==========================
-    // ==========================
-    // CARGAR CONSULTAS SEGÚN CAMPAÑA Y PAGADURÍA
+    // CARGAR CONSULTAS (Unified)
     // ==========================
     useEffect(() => {
-        const loadConsultationsByCampaign = async () => {
-            if (!campaign) {
-                setConsultation([]);
-                // No limpiamos specific aquí porque depende de selectedConsultation
-                return;
-            }
-
+        const loadConsultations = async () => {
             setLoadingConsultations(true);
             try {
                 const payrollId = selectedPayroll?.id || null;
-
-                // Solo cargamos las consultas generales
+                // Cargar todas las consultas activas (opcionalmente filtradas por pagaduría)
                 const consultationsData =
-                    await getActiveConsultationsByCampaign(campaign, payrollId);
+                    await getActiveConsultations(payrollId);
 
                 setConsultation(consultationsData);
 
-                // Resetear las selecciones si ya no son válidas
+                // Resetear seleccion si no es válida
                 if (
                     selectedConsultation &&
                     !consultationsData.find(
-                        (c) => c.id === selectedConsultation.id
+                        (c) => c.id === selectedConsultation.id,
                     )
                 ) {
                     setSelectedConsultation(null);
@@ -96,36 +85,29 @@ export const useAddManagementForm = () => {
             }
         };
 
-        loadConsultationsByCampaign();
-    }, [campaign, selectedPayroll]);
+        loadConsultations();
+    }, [selectedPayroll]);
 
     // ==========================
-    // CARGAR CONSULTAS ESPECÍFICAS SEGÚN CONSULTA SELECCIONADA
+    // CARGAR CONSULTAS ESPECÍFICAS
     // ==========================
     useEffect(() => {
         const loadSpecificConsultations = async () => {
-            if (!campaign || !selectedConsultation) {
+            if (!selectedConsultation) {
                 setSpecific([]);
                 return;
             }
 
-            // setLoadingConsultations(true); // Opcional: si quieres mostrar loading al seleccionar consulta
             try {
-                // Pasamos consultationId en lugar de payrollId
                 const consultationId = selectedConsultation.id;
                 const specificsData =
-                    await getActiveSpecificConsultationsByCampaign(
-                        campaign,
-                        consultationId
-                    );
-
+                    await getActiveSpecificConsultations(consultationId);
                 setSpecific(specificsData);
-                console.log("🚀 useAddManagementForm - specificsData:", specificsData);
 
                 if (
                     selectedSpecificConsultation &&
                     !specificsData.find(
-                        (s) => s.id === selectedSpecificConsultation.id
+                        (s) => s.id === selectedSpecificConsultation.id,
                     )
                 ) {
                     setSelectedSpecificConsultation(null);
@@ -133,13 +115,11 @@ export const useAddManagementForm = () => {
             } catch (error) {
                 console.error("Error al cargar consultas específicas:", error);
                 setSpecific([]);
-            } finally {
-                // setLoadingConsultations(false);
             }
         };
 
         loadSpecificConsultations();
-    }, [campaign, selectedConsultation]);
+    }, [selectedConsultation]);
 
     // ==========================
     // FUNCIONES LÓGICAS
@@ -173,9 +153,7 @@ export const useAddManagementForm = () => {
             if (selectedContact.payroll) {
                 setSelectedPayroll(selectedContact.payroll);
             }
-            if (selectedContact.campaign) {
-                setCampaign(selectedContact.campaign.name);
-            }
+            // Ya no seteamos campaña porque se ha unificado
         }
     }, [selectedContact]);
 
@@ -183,11 +161,9 @@ export const useAddManagementForm = () => {
         setSelectedContact(null);
     };
 
-    // Limpia el formulario
     const handleClear = () => {
-        setCampaign("");
         setSelectedPayroll(null);
-        setSelectedTypeManagement("");
+        setSelectedTypeManagement(null);
         setSelectedContact(null);
         setSelectedSolution("");
         setSelectedConsultation(null);
@@ -219,7 +195,7 @@ export const useAddManagementForm = () => {
     };
 
     const handleCreateContact = () => {
-        setSelectedContact(null); // Deseleccionar contacto actual si existe
+        setSelectedContact(null);
         setContactFormData({
             id: null,
             campaign_id: "",
@@ -250,20 +226,20 @@ export const useAddManagementForm = () => {
             if (contactFormData.id) {
                 response = await updateContact(
                     contactFormData.id,
-                    contactFormData
+                    contactFormData,
                 );
             } else {
                 response = await createContact(contactFormData);
             }
 
-            // El backend suele devolver el objeto creado/editado
             const savedContact = response.contact || response.data || response;
 
-            // Mapear nombres de campaña y pagaduría para el grid local
+            // Para la UI, recuperar nombres de campaña/pagaduría
             const campaignName =
-                contactFormData.campaign_id == 1 ? "Aliados" : "Afiliados";
+                savedContact.campaign?.name ||
+                (contactFormData.campaign_id == 1 ? "Aliados" : "Afiliados");
             const fullPayroll = (payroll || []).find(
-                (p) => p.id === contactFormData.payroll_id
+                (p) => p.id === contactFormData.payroll_id,
             );
 
             setSelectedContact({
@@ -276,7 +252,7 @@ export const useAddManagementForm = () => {
                     id: contactFormData.payroll_id,
                     name:
                         (payroll || []).find(
-                            (p) => p.id === contactFormData.payroll_id
+                            (p) => p.id === contactFormData.payroll_id,
                         )?.name || "—",
                 },
             });
@@ -315,23 +291,12 @@ export const useAddManagementForm = () => {
         }
     };
 
-    // Envía la gestión
     const onSave = async () => {
         const payload = buildPayload();
 
-        //console.log('🔍 useAddManagementForm - onSave tiene campaign:', campaign);
+        // Eliminar validación de campaña
 
-        // Validar que se haya seleccionado una campaña
-        if (!campaign) {
-            setValidationErrors((prev) => ({
-                ...prev,
-                campaign: ["Debes seleccionar una campaña"],
-            }));
-            return;
-        }
-
-        // Pasar la campaña al handleSubmit
-        const success = await handleSubmit(payload, campaign);
+        const success = await handleSubmit(payload);
 
         if (success) {
             if (wsp || sms) {
@@ -355,15 +320,13 @@ export const useAddManagementForm = () => {
         }
     };
 
-    // Capitaliza palabras
     const capitalizeWords = (str) =>
         str
             ? str
                   .split(" ")
                   .map(
-                      (word) =>
-                          word.charAt(0).toUpperCase() +
-                          word.slice(1).toLowerCase()
+                      (w) =>
+                          w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(),
                   )
                   .join(" ")
             : "";
@@ -375,21 +338,18 @@ export const useAddManagementForm = () => {
 
     const filteredTypeManagement = selectedPayroll
         ? typeManagement.filter((item) =>
-              item?.payrolls?.some((p) => p.id === selectedPayroll?.id)
+              item?.payrolls?.some((p) => p.id === selectedPayroll?.id),
           )
         : typeManagement;
 
-    // Las consultas ya están filtradas por campaña en el useEffect (líneas 51-86)
-    // No es necesario filtrar por payroll aquí
     const filteredConsultation = consultation;
-
     const filteredSpecific = specific;
 
+    // Ya no filtramos contactos por campaña, solo por pagaduría si está seleccionada
     const filteredContact = contact.filter((item) => {
-        const matchesCampaign = !campaign || item?.campaign === campaign;
         const matchesPayroll =
             !selectedPayroll || item?.payroll?.id === selectedPayroll.id;
-        return matchesCampaign && matchesPayroll;
+        return matchesPayroll;
     });
 
     // ==========================
@@ -397,11 +357,11 @@ export const useAddManagementForm = () => {
     // ==========================
     useEffect(() => {
         const params = new URLSearchParams(location.search);
-        setCampaign(capitalizeWords(params.get("campaign")));
+        // Eliminado setCampaign
 
         const foundPayroll =
             payroll.find(
-                (p) => p.name === capitalizeWords(params.get("payroll"))
+                (p) => p.name === capitalizeWords(params.get("payroll")),
             ) || null;
         setSelectedPayroll(foundPayroll);
 
@@ -409,7 +369,7 @@ export const useAddManagementForm = () => {
         if (idNumberParam) {
             const foundContact =
                 contact.find(
-                    (c) => c.identification_number === idNumberParam
+                    (c) => c.identification_number === idNumberParam,
                 ) || null;
             setSelectedContact(foundContact);
         }
@@ -423,15 +383,11 @@ export const useAddManagementForm = () => {
         index: i + 1,
     }));
 
-    // ==========================
-    // RETORNO DEL HOOK
-    // ==========================
     return {
         isPopupOpen,
         setIsPopupOpen,
-        // Estados
         payroll,
-        campaign,
+        // campaign: "", // YA NO SE USA
         consultation,
         specific,
         sms,
@@ -448,7 +404,6 @@ export const useAddManagementForm = () => {
         validationErrors,
         loadingConsultations,
 
-        // Setters
         setSms,
         setWsp,
         setSelectedPayroll,
@@ -462,22 +417,18 @@ export const useAddManagementForm = () => {
         setModal,
         clearValidationError,
 
-        // Funciones
         onSave,
         handleClear,
 
-        // Datos filtrados
         filteredTypeManagement,
         filteredConsultation,
         filteredSpecific,
         filteredContact,
 
-        // Nuevos estados
         openSections,
         setOpenSections,
         optionsWithIndex,
 
-        // Editing contact
         isEditingContact,
         contactFormData,
         setContactFormData,

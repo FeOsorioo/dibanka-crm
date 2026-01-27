@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ChangeHistory;
+use App\Models\Entity;
+use App\Models\Campaign;
+use App\Models\Payroll;
 
 class Contact extends Model
 {
     protected $fillable = [
         'campaign_id',
         'payroll_id',
+        'entity_id',
         'name',
         'identification_type',
         'phone',
@@ -29,6 +33,11 @@ class Contact extends Model
         return $this->belongsTo(Payroll::class, 'payroll_id');
     }
 
+    public function entity()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id');
+    }
+
     public function scopeSearch($query, $term)
     {
         return $query->where(function ($q) use ($term) {
@@ -40,6 +49,9 @@ class Contact extends Model
                 ->orWhere('identification_number', 'LIKE', "%{$term}%")
                 ->orWhereHas('payroll', function ($payrollQuery) use ($term) {
                     $payrollQuery->where('name', 'LIKE', "%{$term}%");
+                })
+                ->orWhereHas('entity', function ($entityQuery) use ($term) {
+                    $entityQuery->where('name', 'LIKE', "%{$term}%");
                 })
                 ->orWhereHas('campaign', function ($campaignQuery) use ($term) {
                     $campaignQuery->where('name', 'LIKE', "%{$term}%");

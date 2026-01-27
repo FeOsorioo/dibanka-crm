@@ -11,6 +11,7 @@ export const fields = [
         ],
     },
     { name: "payroll_id", label: "Pagaduría", type: "select", options: [] },
+    { name: "entity_id", label: "Entidad", type: "select", options: [] },
     { name: "name", label: "Nombre", type: "text" },
     { name: "email", label: "Correo", type: "text" },
     { name: "phone", label: "Teléfono", type: "text" },
@@ -36,6 +37,7 @@ export const fields = [
 export const userSchema = yup.object().shape({
     campaign_id: yup.string().required("La campaña es obligatorio"),
     payroll_id: yup.string().required("La pagaduría es obligatorio"),
+    entity_id: yup.string().required("La entidad es obligatoria"),
     name: yup
         .string()
         .required("El nombre es obligatorio"),
@@ -54,11 +56,12 @@ export const columns = [
     { header: "ID", key: "id" },
     { header: "Campaña", key: "campaign.name" },
     { header: "Pagaduría", key: "payroll.name" },
+    { header: "Entidad", key: "entity.name" },
     { header: "Nombre", key: "name" },
     { header: "Correo", key: "email" },
     { header: "Teléfono", key: "phone" },
     { header: "Celular actualizado", key: "update_phone" },
-    //{ header: "Tipo de identificación", key: "identification_type" },
+    { header: "Tipo de identificación", key: "identification_type" },
     { header: "Número de identificación", key: "identification_number" },
 ];
 
