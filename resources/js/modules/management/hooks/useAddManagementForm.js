@@ -55,16 +55,18 @@ export const useAddManagementForm = () => {
     } = useAddManagement(selectedPayroll);
 
     // ==========================
-    // CARGAR CONSULTAS (Unified)
+    // CARGAR CONSULTAS (Con filtro automático por campaña del contacto)
     // ==========================
     useEffect(() => {
         const loadConsultations = async () => {
             setLoadingConsultations(true);
             try {
                 const payrollId = selectedPayroll?.id || null;
-                // Cargar todas las consultas activas (opcionalmente filtradas por pagaduría)
+                const campaignId = selectedContact?.campaign?.id || null;
+                
+                // Cargar consultas filtradas por pagaduría y campaña del contacto
                 const consultationsData =
-                    await getActiveConsultations(payrollId);
+                    await getActiveConsultations(payrollId, campaignId);
 
                 setConsultation(consultationsData);
 
@@ -86,7 +88,7 @@ export const useAddManagementForm = () => {
         };
 
         loadConsultations();
-    }, [selectedPayroll]);
+    }, [selectedPayroll, selectedContact]);
 
     // ==========================
     // CARGAR CONSULTAS ESPECÍFICAS
@@ -393,10 +395,6 @@ export const useAddManagementForm = () => {
     }, [location.search, payroll, contact]);
 
     const [openSections, setOpenSections] = useState({});
-    const optionsWithIndex = filteredConsultation.map((item, i) => ({
-        ...item,
-        index: i + 1,
-    }));
 
     return {
         isPopupOpen,
@@ -442,7 +440,6 @@ export const useAddManagementForm = () => {
 
         openSections,
         setOpenSections,
-        optionsWithIndex,
 
         isEditingContact,
         contactFormData,

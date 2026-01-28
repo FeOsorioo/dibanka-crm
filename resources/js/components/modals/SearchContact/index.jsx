@@ -147,8 +147,7 @@ export default function SearchContact({
                             data={contactSearch}
                             paginationSection={true}
                             actions={true}
-                            edit={true}
-                            onEdit={handleEdit}
+                            edit={false}
                             currentPage={currentPageContact}
                             totalPages={totalPagesContact}
                             rowsPerPage={perPageContact}

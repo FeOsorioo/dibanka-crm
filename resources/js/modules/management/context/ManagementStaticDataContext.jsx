@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import {
   getActivePayrolls,
   getActiveTypeManagements,
+  getActiveCampaigns,
 } from "@modules/management/services/managementService";
 
 const ManagementStaticDataContext = createContext(null);
@@ -13,6 +14,7 @@ const ManagementStaticDataContext = createContext(null);
 export const ManagementStaticDataProvider = ({ children }) => {
   const [payroll, setPayroll] = useState([]);
   const [typeManagement, setTypeManagement] = useState([]);
+  const [campaign, setCampaign] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,15 +34,17 @@ const fetchStaticData = useCallback(async () => {
   setError(null);
 
   try {
-    // Solo cargar datos verdaderamente estáticos (payroll y typeManagement)
+    // Solo cargar datos verdaderamente estáticos (payroll, typeManagement y campaign)
     // Las consultas ahora se cargan dinámicamente por campaña en useAddManagementForm
     const results = await Promise.allSettled([
       getActivePayrolls(),
       getActiveTypeManagements(),
+      getActiveCampaigns(),
     ]);
     
     setPayroll(results[0].status === 'fulfilled' ? results[0].value : []);
     setTypeManagement(results[1].status === 'fulfilled' ? results[1].value : []);
+    setCampaign(results[2].status === 'fulfilled' ? results[2].value : []);
     
     // Log errores individuales
     results.forEach((result, index) => {
@@ -67,6 +71,7 @@ const fetchStaticData = useCallback(async () => {
     // Datos
     payroll,
     typeManagement,
+    campaign,
     // consultation y specific se eliminaron - ahora son dinámicos por campaña
 
     // Estados

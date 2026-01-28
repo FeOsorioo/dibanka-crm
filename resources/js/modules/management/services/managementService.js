@@ -84,12 +84,23 @@ export const updateManagementMonitoring = async (id, payload) => {
 /**
  * Consultas activas.
  * @param {number} payrollId - ID de la pagaduría (opcional)
+ * @param {number} campaignId - ID de la campaña (opcional)
  */
-export const getActiveConsultations = async (payrollId = null) => {
+export const getActiveConsultations = async (payrollId = null, campaignId = null) => {
     let endpoint = "/config/consultations/active";
+    const params = new URLSearchParams();
 
     if (payrollId) {
-        endpoint += `?payroll_id=${payrollId}`;
+        params.append("payroll_id", payrollId);
+    }
+
+    if (campaignId) {
+        params.append("campaign_id", campaignId);
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+        endpoint += `?${queryString}`;
     }
 
     try {
@@ -99,6 +110,14 @@ export const getActiveConsultations = async (payrollId = null) => {
         console.error("Error al obtener consultas:", error);
         return [];
     }
+};
+
+/**
+ * Campañas activas.
+ */
+export const getActiveCampaigns = async () => {
+    const { data } = await api.get("/campaign");
+    return data || [];
 };
 
 /**

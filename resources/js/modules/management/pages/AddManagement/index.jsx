@@ -63,12 +63,11 @@ const AddManagement = () => {
         onSave,
         handleClear,
         filteredTypeManagement,
-        filteredConsultation,
         filteredSpecific,
         filteredContact,
         openSections,
         setOpenSections,
-        optionsWithIndex,
+        filteredConsultation,
 
         // Editing contact
         isEditingContact,
@@ -584,9 +583,9 @@ const AddManagement = () => {
                         Motivo de consulta
                     </h2>
                     <Autocomplete
-                        options={optionsWithIndex}
+                        options={filteredConsultation}
                         getOptionLabel={(option) =>
-                            `${option?.index || ""} | ${option?.name || ""}`
+                            `${option?.id || ""} | ${option?.name || ""}`
                         }
                         value={selectedConsultation}
                         onChange={(event, value) => {
