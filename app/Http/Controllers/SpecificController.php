@@ -18,7 +18,7 @@ class SpecificController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Specific::with(['consultation.payrolls']);
+        $query = Specific::with(['consultation.payrolls', 'consultation.campaign']);
 
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
@@ -62,8 +62,8 @@ class SpecificController extends Controller
     // Trae solo consultas específicas activas con paginación y búsqueda
     public function active(Request $request)
     {
-        $query = Specific::with(['consultation.payrolls'])
-            ->where('is_active', 1);
+        $query = Specific::with(['consultation.payrolls', 'consultation.campaign'])
+        ->where('is_active', 1);
 
         // Filtrar por consulta si se proporciona consultation_id
         if ($request->has('consultation_id') && !empty($request->consultation_id)) {

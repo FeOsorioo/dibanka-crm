@@ -50,10 +50,9 @@ export const fields = [
 
 export const userSchema = Yup.object().shape({
     name: Yup.string().required("El nombre es requerido"),
-    phone: Yup.string().required("El teléfono es requerido"),
+    phone: Yup.string(),
     email: Yup.string()
-        .email("Email inválido")
-        .required("El email es requerido"),
-    nit: Yup.string().required("El NIT es requerido"),
+        .email("Email inválido"),
+    nit: Yup.string(),
     description: Yup.string().nullable(),
 });

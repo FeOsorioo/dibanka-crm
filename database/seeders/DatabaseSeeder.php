@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name'       => 'Lider de campaña',
-                'email'      => 'campaing_manager@example.com',
+                'email'      => 'campaign_manager@example.com',
                 'password'   => Hash::make('password'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -328,13 +328,13 @@ class DatabaseSeeder extends Seeder
         // -----------------------------
         // 14) PIVOTES 
         // -----------------------------
-        $existsPA1 = DB::table('payroll_consultations')
+        $existsPA1 = DB::table('consultations_payroll')
             ->where('consultation_id', $consultationId)
             ->where('payroll_id', $payrollIds[0] ?? 0)
             ->first();
 
         if (! $existsPA1) {
-            DB::table('payroll_consultations')->insert([
+            DB::table('consultations_payroll')->insert([
                 [
                     'consultation_id' => $consultationId,
                     'payroll_id'      => $payrollIds[0] ?? null,

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useMultiFilter } from "@hooks/useMultiFilter";
 import Swal from "sweetalert2";
 import {
     getSpecialCases,
@@ -19,9 +20,10 @@ export const useSpecialCases = () => {
     const [error, setError] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
 
+    // === Nuevo Sistema de Filtros (Lista Principal) ===
+    const { filters, addFilter, removeFilter, clearFilters } = useMultiFilter();
+
     // Paginación
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterColumn, setFilterColumn] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(1);
     const [totalItems, setTotalItems] = useState(1);
@@ -34,14 +36,23 @@ export const useSpecialCases = () => {
     const [selectedContact, setSelectedContact] = useState(null);
     const [openSearchContact, setOpenSearchContact] = useState(false);
 
+    // === Nuevo Sistema de Filtros (Búsqueda de Contactos) ===
+    const {
+        filters: filtersContact,
+        addFilter: addFilterContact,
+        removeFilter: removeFilterContact,
+        clearFilters: clearFiltersContact,
+    } = useMultiFilter();
+
     // Contact Search Pagination
     const [contactSearch, setContactSearch] = useState([]);
     const [currentPageContact, setCurrentPageContact] = useState(1);
     const [totalPagesContact, setTotalPagesContact] = useState(1);
-    const [searchTermContact, setSearchTermContact] = useState("");
     const [perPageContact, setPerPageContact] = useState(10);
     const [totalItemsContact, setTotalItemsContact] = useState(0);
     const [loadingContact, setLoadingContact] = useState(false);
+
+    const isFetchingContacts = useRef(false);
 
     // ====================== Historial de Cambios ======================
     const [openHistory, setOpenHistory] = useState(false);
@@ -55,11 +66,14 @@ export const useSpecialCases = () => {
     /* ===========================================================
      *  Fetch principal
      * =========================================================== */
+    /* ===========================================================
+     *  Fetch principal
+     * =========================================================== */
     const fetchSpecialCases = useCallback(
-        async (page = 1, search = "", column = filterColumn) => {
+        async (page = 1, currentFilters = filters) => {
             setLoading(true);
             try {
-                const data = await getSpecialCases(page, search, column);
+                const data = await getSpecialCases(page, currentFilters);
                 setSpecialCases(data.specialCases);
                 setTotalPages(data.pagination.total_pages);
                 setCurrentPage(data.pagination.current_page);
@@ -72,30 +86,21 @@ export const useSpecialCases = () => {
                 setLoading(false);
             }
         },
-        []
+        [filters],
     );
 
     // 🔥 NUEVO: useEffect para buscar cuando cambie el searchTerm
-    // 🔥 NUEVO: useEffect para buscar cuando cambie el searchTerm
+    // Recargar cuando cambian los filtros
     useEffect(() => {
-        fetchSpecialCases(currentPage, searchTerm, filterColumn);
-    }, [searchTerm, currentPage, filterColumn, fetchSpecialCases]);
+        fetchSpecialCases(1, filters);
+    }, [filters]);
 
-    const fetchPage = useCallback((page) => {
-        setCurrentPage(page);
-    }, []);
-
-    const handleSearch = useCallback((value, column = "") => {
-        setSearchTerm(value);
-        setFilterColumn(column);
-        setCurrentPage(1); // Resetear a la primera página al buscar
-    }, []);
-
-    const handleClearSearch = useCallback(() => {
-        setSearchTerm("");
-        setFilterColumn("");
-        setCurrentPage(1);
-    }, []);
+    const fetchPage = useCallback(
+        (page) => {
+            fetchSpecialCases(page, filters);
+        },
+        [filters, fetchSpecialCases],
+    );
 
     /* ===========================================================
      *  Crear o actualizar
@@ -123,7 +128,8 @@ export const useSpecialCases = () => {
             });
 
             setIsOpenADD(false);
-            fetchSpecialCases(currentPage, searchTerm);
+            setIsOpenADD(false);
+            fetchSpecialCases(currentPage, filters);
         } catch (error) {
             if (error.response?.status === 422) {
                 setValidationErrors(error.response.data.errors);
@@ -163,20 +169,24 @@ export const useSpecialCases = () => {
     }, []);
 
     // Fetch contacts for search modal with pagination
+    // Fetch contacts for search modal with pagination
     const fetchContactsSearch = useCallback(
-        async (page = 1, search = "") => {
+        async (page = 1, currentFilters = filtersContact) => {
+            if (isFetchingContacts.current) return;
+            isFetchingContacts.current = true;
             setLoadingContact(true);
             try {
-                const payrollName = selectedPayroll?.name || "";
-                const contactData = await getContacts(
-                    page,
-                    search,
-                    payrollName
-                );
+                // Agregar pagaduría seleccionada a los filtros si existe
+                const queryFilters = { ...currentFilters };
+                if (selectedPayroll?.name) {
+                    queryFilters.payroll = selectedPayroll.name;
+                }
+
+                const contactData = await getContacts(page, queryFilters);
 
                 setContactSearch(contactData.contacts || []);
                 setCurrentPageContact(
-                    contactData.pagination?.current_page || 1
+                    contactData.pagination?.current_page || 1,
                 );
                 setTotalPagesContact(contactData.pagination?.total_pages || 1);
                 setPerPageContact(contactData.pagination?.per_page || 10);
@@ -185,19 +195,18 @@ export const useSpecialCases = () => {
                 console.error("Error al obtener contactos:", err);
             } finally {
                 setLoadingContact(false);
+                isFetchingContacts.current = false;
             }
         },
-        [selectedPayroll]
+        [selectedPayroll, filtersContact],
     );
 
-    const handleSearchContact = useCallback((value) => {
-        setSearchTermContact(value);
-        setCurrentPageContact(1);
-    }, []);
-
-    const fetchPageContact = useCallback((page) => {
-        setCurrentPageContact(page);
-    }, []);
+    const fetchPageContact = useCallback(
+        (page) => {
+            fetchContactsSearch(page, filtersContact);
+        },
+        [fetchContactsSearch, filtersContact],
+    );
 
     const fetchUser = useCallback(async (page = 1) => {
         try {
@@ -218,28 +227,12 @@ export const useSpecialCases = () => {
     }, [fetchPayroll, fetchContact, fetchUser]);
 
     // useEffect para buscar contactos cuando cambie la pagaduría seleccionada
-    useEffect(() => {
-        if (openSearchContact && selectedPayroll) {
-            fetchContactsSearch(1, searchTermContact);
-        }
-    }, [
-        selectedPayroll,
-        openSearchContact,
-        fetchContactsSearch,
-        searchTermContact,
-    ]);
-
-    // useEffect para buscar cuando cambie el término de búsqueda o página de contactos
+    // useEffect para buscar CONTACTOS cuando cambie la pagaduría seleccionada
     useEffect(() => {
         if (openSearchContact) {
-            fetchContactsSearch(currentPageContact, searchTermContact);
+            fetchContactsSearch(1, filtersContact);
         }
-    }, [
-        searchTermContact,
-        currentPageContact,
-        openSearchContact,
-        fetchContactsSearch,
-    ]);
+    }, [selectedPayroll, openSearchContact, filtersContact]);
 
     /* ===========================================================
      *  Auxiliares
@@ -281,7 +274,7 @@ export const useSpecialCases = () => {
         clearFieldError("contact_id");
 
         // Resetear búsqueda de contactos
-        setSearchTermContact("");
+        clearFiltersContact();
         setCurrentPageContact(1);
     };
 
@@ -291,7 +284,7 @@ export const useSpecialCases = () => {
         setFormData({});
         setSelectedPayroll(null);
         setSelectedContact(null);
-        setSearchTermContact("");
+        clearFiltersContact();
         setCurrentPageContact(1);
     };
 
@@ -323,7 +316,7 @@ export const useSpecialCases = () => {
             setCurrentPageH(1);
             fetchHistoryChanges(contact.id, 1);
         },
-        [fetchHistoryChanges]
+        [fetchHistoryChanges],
     );
 
     // Función para cambiar de página en el historial
@@ -333,7 +326,7 @@ export const useSpecialCases = () => {
                 fetchHistoryChanges(selectedContact.id, page);
             }
         },
-        [selectedContact, fetchHistoryChanges]
+        [selectedContact, fetchHistoryChanges],
     );
 
     /* ===========================================================
@@ -345,8 +338,10 @@ export const useSpecialCases = () => {
         payroll,
         users,
         contact,
-        searchTerm,
-        filterColumn,
+        filters,
+        addFilter,
+        removeFilter,
+        clearFilters,
 
         // Estado general
         loading,
@@ -366,7 +361,10 @@ export const useSpecialCases = () => {
         contactSearch,
         currentPageContact,
         totalPagesContact,
-        searchTermContact,
+        filtersContact,
+        addFilterContact,
+        removeFilterContact,
+        clearFiltersContact,
         perPageContact,
         totalItemsContact,
         loadingContact,
@@ -379,15 +377,6 @@ export const useSpecialCases = () => {
         setOpenSearchContact,
         fetchSpecialCases,
         fetchPage,
-        handleSearch,
-        handleSubmit,
-        handleClearSearch,
-        fetchUser,
-        handleCloseModal,
-        clearFieldError,
-        onSelectContact,
-        fetchContactsSearch,
-        handleSearchContact,
         fetchPageContact,
         handlePayrollChange,
 
@@ -403,5 +392,9 @@ export const useSpecialCases = () => {
         fetchHistoryChanges,
         handleOpenHistory,
         fetchHistoryPage,
+
+        // Funciones auxiliares
+        onSelectContact,
+        clearFieldError,
     };
 };

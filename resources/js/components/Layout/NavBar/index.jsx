@@ -57,7 +57,7 @@ const NavBar = ({
             label: "Contactos",
             path: "/contactos",
             icon: <HiOutlineIdentification className="text-white w-6 h-auto" />,
-            permission: "contact.edit",
+            permission: "contact.view",
         },
         {
             id: id_management,
@@ -71,14 +71,14 @@ const NavBar = ({
             label: "Casos especiales",
             path: "/casos_especiales",
             icon: <MdOutlineFolderSpecial className="text-white w-6 h-auto" />,
-            permission: "special_cases.edit",
+            permission: "special_cases.view",
         },
         {
             id: id_entity,
             label: "Entidades",
             path: "/entidades",
             icon: <PiCityDuotone className="text-white w-6 h-auto" />,
-            permission: "contact.edit",
+            permission: "contact.view",
         },
     ];
 

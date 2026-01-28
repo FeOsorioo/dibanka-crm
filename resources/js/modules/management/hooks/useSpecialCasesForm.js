@@ -4,22 +4,25 @@ import Swal from "sweetalert2";
 import { useAddManagement } from "@modules/management/hooks/useAddManagement";
 import api from "@api/axios";
 
-export const useSpecialCasesForm = (onContactSelected) => {  // 🔥 Nuevo parámetro
+export const useSpecialCasesForm = (onContactSelected) => {
+    // 🔥 Nuevo parámetro
     const { user } = useContext(AuthContext);
     const location = window.location;
     const [openSpecialCases, setOpenSpecialCases] = useState(false);
     const [openSearchContact, setOpenSearchContact] = useState(false);
-    
-    const { 
-        payroll, 
+
+    const {
+        payroll,
         contact,
         currentPageContact,
         totalPagesContact,
         perPageContact,
         totalItemsContact,
         fetchPageContact,
-        handleSearchContact,
-        searchTermContact,
+        filtersContact,
+        addFilterContact,
+        removeFilterContact,
+        clearFiltersContact,
     } = useAddManagement();
 
     const [selectedPayrollSpecial, setSelectedPayrollSpecial] = useState(null);
@@ -55,14 +58,14 @@ export const useSpecialCasesForm = (onContactSelected) => {  // 🔥 Nuevo pará
             payroll.find(
                 (p) =>
                     p.name?.toLowerCase().trim() ===
-                    payrollParam?.toLowerCase().trim()
+                    payrollParam?.toLowerCase().trim(),
             ) || null;
 
         const foundContact =
             contact.find(
                 (c) =>
                     c.identification_number?.toString().trim() ===
-                    idNumberParam?.toString().trim()
+                    idNumberParam?.toString().trim(),
             ) || null;
 
         if (foundPayroll) setSelectedPayrollSpecial(foundPayroll);
@@ -117,13 +120,15 @@ export const useSpecialCasesForm = (onContactSelected) => {  // 🔥 Nuevo pará
             console.log("❌ Error del servidor:", error.response?.data);
             if (error.response?.status === 422) {
                 setValidationErrorsSpecial(
-                    error.response.data.errors || error.response.data.data || {}
+                    error.response.data.errors ||
+                        error.response.data.data ||
+                        {},
                 );
             } else {
                 Swal.fire(
                     "❌ Error",
                     "No se pudo guardar el caso especial",
-                    "error"
+                    "error",
                 );
             }
         } finally {
@@ -153,7 +158,7 @@ export const useSpecialCasesForm = (onContactSelected) => {  // 🔥 Nuevo pará
         }));
         clearFieldError("contact_id");
         setOpenSearchContact(false);
-        
+
         // 🔥 NUEVO: Notificar al componente padre (AddManagement)
         if (onContactSelected) {
             onContactSelected(contact);
@@ -195,8 +200,10 @@ export const useSpecialCasesForm = (onContactSelected) => {  // 🔥 Nuevo pará
         perPageContact,
         totalItemsContact,
         fetchPageContact,
-        handleSearchContact,
-        searchTermContact,
+        filtersContact,
+        addFilterContact,
+        removeFilterContact,
+        clearFiltersContact,
         loadingContact,
     };
 };

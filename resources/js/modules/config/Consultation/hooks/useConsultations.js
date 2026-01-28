@@ -6,11 +6,13 @@ import {
     updateConsultation,
     deleteConsultation,
     getActivePayrolls,
+    getCampaigns,
 } from "@modules/config/Consultation/services/consultationService";
 
 export const useConsultations = () => {
     const [consultations, setConsultations] = useState([]);
     const [payroll, setPayroll] = useState([]);
+    const [campaign, setCampaign] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
@@ -27,6 +29,7 @@ export const useConsultations = () => {
         id: null,
         name: "",
         payroll_ids: [],
+        campaign_ids: [],
         is_active: true,
     });
 
@@ -91,6 +94,26 @@ export const useConsultations = () => {
     }, [fetchPayroll]);
 
     /* ===========================================================
+     *  Obtener campañas para selector
+     * =========================================================== */
+    const fetchCampaign = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getCampaigns();
+            setCampaign(data.campaign || data); // Fallback in case structure varies
+        } catch (err) {
+            console.error("Error al obtener campañas:", err);
+            setError("Error al obtener las campañas.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCampaign();
+    }, [fetchCampaign]);
+
+    /* ===========================================================
      *  Crear o actualizar consulta
      * =========================================================== */
     const handleSubmit = async (e) => {
@@ -135,17 +158,25 @@ export const useConsultations = () => {
      *  Editar
      * =========================================================== */
     const handleEdit = (row) => {
-        // Extraer IDs de payrolls (puede ser un array o un objeto único)
+        // Extraer IDs de payrolls
         const payrollIds = Array.isArray(row.payrolls)
             ? row.payrolls.map((p) => p.id)
             : row.payrolls?.id
               ? [row.payrolls.id]
               : [];
 
+        // Extraer IDs de campaigns
+        const campaignIds = Array.isArray(row.campaign)
+            ? row.campaign.map((c) => c.id)
+            : row.campaign?.id
+              ? [row.campaign.id]
+              : [];
+
         setFormData({
             id: row.id,
             name: row.name,
             payroll_ids: payrollIds,
+            campaign_ids: campaignIds,
             is_active: row.is_active,
         });
         setValidationErrors({});
@@ -200,6 +231,7 @@ export const useConsultations = () => {
             id: null,
             name: "",
             payroll_ids: [],
+            campaign_ids: [],
             is_active: true,
         });
     };
@@ -209,6 +241,7 @@ export const useConsultations = () => {
         inactive,
         consultations,
         payroll,
+        campaign,
         loading,
         error,
         isOpenADD,

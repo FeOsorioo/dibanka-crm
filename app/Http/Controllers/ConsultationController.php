@@ -19,7 +19,7 @@ class ConsultationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Consultation::with(['payrolls']);
+        $query = Consultation::with(['payrolls', 'campaign']);
 
         if ($request->has('search') && !empty($request->search)) {
             $searchTerm = $request->search;
@@ -30,6 +30,9 @@ class ConsultationController extends Controller
                 // Para buscar en relaciones
                 $q->orWhereHas('payrolls', function ($payrolQuery) use ($searchTerm) {
                     $payrolQuery->where('name', 'LIKE', "%{$searchTerm}%");
+                });
+                $q->orWhereHas('campaign', function ($campaignQuery) use ($searchTerm) {
+                    $campaignQuery->where('name', 'LIKE', "%{$searchTerm}%");
                 });
             });
         }
@@ -65,13 +68,21 @@ class ConsultationController extends Controller
     // Trae solo consultas activas con paginación y búsqueda
     public function active(Request $request)
     {
-        $query = Consultation::active()->with(['payrolls']);
+        $query = Consultation::active()->with(['payrolls', 'campaign']);
 
         // Filtrar por pagaduría si se proporciona payroll_id
         if ($request->has('payroll_id') && !empty($request->payroll_id)) {
             $payrollId = $request->payroll_id;
             $query->whereHas('payrolls', function ($payrollQuery) use ($payrollId) {
                 $payrollQuery->where('payrolls.id', $payrollId);
+            });
+        }
+
+        // Filtrar por campaña si se proporciona campaign_id
+        if ($request->has('campaign_id') && !empty($request->campaign_id)) {
+            $campaignId = $request->campaign_id;
+            $query->whereHas('campaign', function ($campaignQuery) use ($campaignId) {
+                $campaignQuery->where('campaign.id', $campaignId);
             });
         }
 
@@ -85,6 +96,11 @@ class ConsultationController extends Controller
                 // Buscar también en relaciones de pagaduría
                 $q->orWhereHas('payrolls', function ($payrollQuery) use ($searchTerm) {
                     $payrollQuery->where('name', 'LIKE', "%{$searchTerm}%");
+                });
+
+                // Buscar también en relaciones de campaña
+                $q->orWhereHas('campaign', function ($campaignQuery) use ($searchTerm) {
+                    $campaignQuery->where('name', 'LIKE', "%{$searchTerm}%");
                 });
             });
         }
@@ -113,12 +129,17 @@ class ConsultationController extends Controller
     {
         $consultation = Consultation::create($request->validated());
 
-        //Crear automaticamente los registros pivote
-        if ($request->has('payroll_ids')) {
+        // Sincronizar payrolls
+        if ($request->filled('payroll_ids')) {
             $consultation->payrolls()->sync($request->payroll_ids);
         }
 
-        $consultation->load('payrolls');
+        // Sincronizar campaign
+        if ($request->filled('campaign_ids')) {
+            $consultation->campaign()->sync($request->campaign_ids);
+        }
+
+        $consultation->load('payrolls', 'campaign');
 
         log_activity('crear', 'Consultas', [
             'mensaje' => "El usuario {$request->user()->name} creó una nueva consulta.",
@@ -132,20 +153,22 @@ class ConsultationController extends Controller
     }
 
     /**
-     * Mostrar una consulta específica
+     * Mostrar una consulta
      */
     public function show(Request $request, string $id)
     {
         $query = Consultation::query();
         if (method_exists(new Consultation, 'specifics')) {
-            $query->with('specifics');
+            $query->with(['specifics']);
         }
 
         $consultation = $query->find($id);
 
-        if (! $consultation) {
+        if (!$consultation) {
             return response()->json(['message' => 'Consulta no encontrada'], Response::HTTP_NOT_FOUND);
         }
+
+        $consultation->load(['payrolls', 'campaign']);
         log_activity('ver_detalle', 'Consultas', [
             'mensaje' => "El usuario {$request->user()->name} consultó el detalle de una consulta.",
             'consulta_id' => $id,
@@ -161,7 +184,7 @@ class ConsultationController extends Controller
      * Actualizar una consulta
      * Permite actualizar y re-sincronizar la tabla pivote opcionalmente
      */
-    public function update(ConsultationRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $consultation = Consultation::findOrFail($id);
         $consultationBefore = $consultation->toArray();
@@ -170,9 +193,14 @@ class ConsultationController extends Controller
         if ($request->has('payroll_ids')) {
             $consultation->payrolls()->sync($request->payroll_ids);
         }    
+
+        // Sincronizar campañas (si vienen)
+        if ($request->has('campaign_ids')) {
+            $consultation->campaign()->sync($request->campaign_ids);
+        }
         
         // Obtener estado actualizado después del sync
-        $after = $consultation->load('payrolls')->toArray();    
+        $after = $consultation->load('payrolls', 'campaign')->toArray();    
 
         $consultation->update($request->all());
 
@@ -206,7 +234,11 @@ class ConsultationController extends Controller
 
         // Si se DESACTIVA → borrar relaciones y desactivar consultas específicas
         if ($newState === 0) {
-            \DB::table('payroll_consultations')
+            \DB::table('consultations_payroll')
+                ->where('consultation_id', $consultation->id)
+                ->delete();
+                
+            \DB::table('consultations_campaign')
                 ->where('consultation_id', $consultation->id)
                 ->delete();
 
@@ -246,8 +278,6 @@ class ConsultationController extends Controller
             'message' => "Contar todas las consultas activas"
 
         ], $request);
-
-
 
         return response()->json(['count' => $count], Response::HTTP_OK);
     }

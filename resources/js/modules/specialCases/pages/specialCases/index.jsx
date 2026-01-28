@@ -7,17 +7,20 @@ import Table from "@components/tables/Table";
 import ButtonAdd from "@components/ui/ButtonAdd";
 import FormSpecialCases from "@components/modals/FormSpecialCases";
 import SearchContact from "@components/modals/SearchContact";
-import FilterSearch from "@components/ui/FilterSearch";
+import MultiFilter from "@components/ui/MultiFilter";
 import HistoryChanges from "@components/ui/HistoryChanges";
+import { Box } from "@mui/material";
 
 import { AuthContext } from "@context/AuthContext";
 
-const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
+const SpecialCases = ({ idAddSpecialCase }) => {
     const { user } = useContext(AuthContext);
     const {
-        payroll,
         fetchPage,
-        handleSearch,
+        filters,
+        addFilter,
+        removeFilter,
+        clearFilters,
         specialCases,
         loading,
         isOpenADD,
@@ -30,11 +33,7 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
         totalPages,
         totalItems,
         perPage,
-        handleCloseModal,
-        selectedPayroll,
-        setSelectedPayroll,
         selectedContact,
-        setSelectedContact,
         openSearchContact,
         setOpenSearchContact,
         clearFieldError,
@@ -45,14 +44,10 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
         perPageContact,
         totalItemsContact,
         loadingContact,
-        fetchContactsSearch,
-        handleSearchContact,
-        fetchPageContact,
-        searchTermContact,
-        searchTerm,
-        filterColumn,
-        handleClearSearch,
-        //historial
+        filtersContact,
+        addFilterContact,
+        removeFilterContact,
+        clearFiltersContact,
         openHistory,
         setOpenHistory,
         history,
@@ -61,8 +56,6 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
         perPageH,
         totalItemsH,
         loadingHistory,
-        fetchHistoryChanges,
-        handleOpenHistory,
         fetchHistoryPage,
     } = useSpecialCases();
     const { can, canAny } = useCan();
@@ -106,37 +99,33 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
 
     return (
         <>
-            {can("special_cases.create") && (
-                <ButtonAdd
-                    id={idAddSpecialCase}
-                    onClickButtonAdd={() => setIsOpenADD(true)}
-                    text="Agregar caso especial"
-                />
-            )}
-            <div className="flex justify-end px-12 -mt-10 ">
-                <FilterSearch
-                    onFilter={handleSearch}
-                    filterOptions={filterOptions}
-                    initialSearchValue={searchTerm}
-                    initialSelectedFilter={filterColumn}
-                    placeholder="Buscar caso especial..."
-                />
-                {searchTerm && (
-                    <button
-                        onClick={handleClearSearch}
-                        className="bg-red-500 text-white h-[50%] px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                    >
-                        Limpiar filtro
-                    </button>
-                )}
-            </div>
-
+            <Box sx={{ width: "100%", mb: 4, margin: "auto", px: 10, marginLeft: "10px" }}>
             <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
                 Lista de casos especiales
             </h1>
+
+            <div className="flex justify-between mb-4 ">
+                <ButtonAdd
+                    className="lg:ml-[0%]"
+                    id={idAddSpecialCase}
+                    disabled={!can("special_cases.create")}
+                    onClickButtonAdd={() => setIsOpenADD(true)}
+                    text="Agregar caso especial"
+                />
+
+                <MultiFilter
+                    onAddFilter={addFilter}
+                    onRemoveFilter={removeFilter}
+                    onClearFilters={clearFilters}
+                    filters={filters}
+                    options={filterOptions}
+                    className="w-full max-w-2xl"
+                />
+            </div>
+
             <FormSpecialCases
                 isOpen={isOpenADD}
-                setIsOpen={handleCloseModal}
+                setIsOpen={setIsOpenADD}
                 selectedContact={selectedContact}
                 formData={formData}
                 setFormData={setFormData}
@@ -152,9 +141,10 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
                 perPageContact={perPageContact}
                 totalItemsContact={totalItemsContact}
                 loadingContact={loadingContact}
-                handleSearchContact={handleSearchContact}
-                fetchPageContact={fetchPageContact}
-                searchTermContact={searchTermContact}
+                filtersContact={filtersContact}
+                addFilterContact={addFilterContact}
+                removeFilterContact={removeFilterContact}
+                clearFiltersContact={clearFiltersContact}
             />
 
             <SearchContact
@@ -167,15 +157,17 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
                 perPageContact={perPageContact}
                 totalItemsContact={totalItemsContact}
                 loadingContact={loadingContact}
-                handleSearchContact={handleSearchContact}
-                fetchPageContact={fetchPageContact}
-                searchTermContact={searchTermContact}
+                filtersContact={filtersContact}
+                addFilterContact={addFilterContact}
+                removeFilterContact={removeFilterContact}
+                clearFiltersContact={clearFiltersContact}
             />
 
             {loading ? (
                 <TableSkeleton rows={11} />
             ) : (
                 <Table
+                    width="100%"
                     columns={columns}
                     data={specialCases}
                     currentPage={currentPage}
@@ -183,6 +175,7 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
                     rowsPerPage={perPage}
                     totalItems={totalItems}
                     fetchPage={(page) => fetchPage(page)}
+                    onSelectContact={onSelectContact}
                 />
             )}
             <HistoryChanges
@@ -197,6 +190,7 @@ const SpecialCases = ({ idAddSpecialCase, idSearchSpecialCase }) => {
                 perPage={perPageH}
                 onPageChange={fetchHistoryPage}
             />
+            </Box>
         </>
     );
 };

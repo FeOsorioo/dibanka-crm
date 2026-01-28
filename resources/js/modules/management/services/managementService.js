@@ -160,18 +160,19 @@ export const getActivePayrolls = async () => {
 /**
  * Contactos con filtro por columna.
  */
-export const getContacts = async (page = 1, search = "", filterColumn = "") => {
-    let url = `/contacts/active?page=${page}`;
+export const getContacts = async (page = 1, filters = {}) => {
+    const params = new URLSearchParams({ page });
 
-    if (filterColumn && search) {
-        url += `&searchValue=${encodeURIComponent(
-            search,
-        )}&filterColumn=${filterColumn}`;
-    } else if (search) {
-        url += `&search=${encodeURIComponent(search)}`;
+    // Agregar filtros dinámicos a la URL
+    if (typeof filters === "string") {
+        if (filters) params.append("search", filters);
+    } else {
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params.append(key, value);
+        });
     }
 
-    const { data } = await api.get(url);
+    const { data } = await api.get(`/contacts/active?${params.toString()}`);
     return data || [];
 };
 

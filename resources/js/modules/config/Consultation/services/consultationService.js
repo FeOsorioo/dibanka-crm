@@ -58,3 +58,15 @@ export const getActivePayrolls = async () => {
     const { data } = await api.get("/payrolls/active");
     return data.data || [];
 };
+
+/* ===========================================================
+ *  SERVICIO DE CAMPAÑAS (para selector)
+ * =========================================================== */
+
+/**
+ * Obtiene todas las campañas.
+ */
+export const getCampaigns = async () => {
+    const { data } = await api.get("/campaign");
+    return data || [];
+};

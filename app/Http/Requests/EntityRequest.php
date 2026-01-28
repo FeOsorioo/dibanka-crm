@@ -23,10 +23,10 @@ class EntityRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'phone' => 'numeric',
-            'email' => 'email',
-            'nit' => 'string',
-            'description' => 'string',
+            'phone' => 'numeric|nullable',
+            'email' => 'email|nullable',
+            'nit' => 'string|nullable',
+            'description' => 'string|nullable',
         ];
     }
 

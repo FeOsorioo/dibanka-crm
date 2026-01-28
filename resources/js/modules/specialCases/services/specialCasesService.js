@@ -7,22 +7,15 @@ import api from "@api/axios";
 /**
  * Obtiene todos los casos especiales con paginación y búsqueda.
  */
-export const getSpecialCases = async (
-    page = 1,
-    search = "",
-    filterColumn = ""
-) => {
-    let url = `/specialcases?page=${page}`;
+export const getSpecialCases = async (page = 1, filters = {}) => {
+    const params = new URLSearchParams({ page });
 
-    if (filterColumn && search) {
-        url += `&searchValue=${encodeURIComponent(
-            search
-        )}&filterColumn=${filterColumn}`;
-    } else if (search) {
-        url += `&search=${encodeURIComponent(search)}`;
-    }
+    // Agregar filtros dinámicos a la URL
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+    });
 
-    const { data } = await api.get(url);
+    const { data } = await api.get(`/specialcases?${params.toString()}`);
 
     return {
         specialCases: data.specialcases || [],
@@ -58,18 +51,15 @@ export const getActivePayrolls = async () => {
 /**
  * Lista de contactos con paginación, búsqueda y filtro por pagaduría.
  */
-export const getContacts = async (page = 1, search = "", payrollName = "") => {
-    let url = `/contacts/active?page=${page}`;
+export const getContacts = async (page = 1, filters = {}) => {
+    const params = new URLSearchParams({ page });
 
-    if (search) {
-        url += `&search=${encodeURIComponent(search)}`;
-    }
+    // Agregar filtros dinámicos a la URL
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+    });
 
-    if (payrollName) {
-        url += `&payroll=${encodeURIComponent(payrollName)}`;
-    }
-
-    const { data } = await api.get(url);
+    const { data } = await api.get(`/contacts/active?${params.toString()}`);
 
     return {
         contacts: data.contacts || [],
@@ -103,7 +93,7 @@ export const getUsers = async (page = 1) => {
  */
 export const getHistoryChanges = async (specialcaseId, page = 1) => {
     const { data } = await api.get(
-        `/change-histories/entity/specialcases/${specialcaseId}?page=${page}`
+        `/change-histories/entity/specialcases/${specialcaseId}?page=${page}`,
     );
     return data;
 };

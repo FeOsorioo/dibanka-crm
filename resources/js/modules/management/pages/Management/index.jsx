@@ -15,6 +15,7 @@ const columns = [
     { header: "Campaña", key: "contact.campaign.name" },
     { header: "Agente", key: "user.name" },
     { header: "Pagaduría", key: "contact.payroll.name" },
+    { header: "Entidad", key: "contact.entity" },
     { header: "Nombre de cliente", key: "contact.name" },
     { header: "Identificación", key: "contact.identification_number" },
     { header: "Celular", key: "contact.phone" },
@@ -30,6 +31,7 @@ const filterOptions = [
     { value: "name", label: "Nombre de cliente" },
     { value: "phone", label: "Celular" },
     { value: "payroll", label: "Pagaduría" },
+    { value: "entity", label: "Entidad" },
     { value: "consultation", label: "Consulta" },
     { value: "user", label: "Agente" },
     { value: "wolkvox_id", label: "Wolkvox_id" },
@@ -120,29 +122,28 @@ const Management = ({
 
     return (
         <>
-            <Box sx={{ width: "100%", mb: 4, margin: "auto", px: 2 }}>
+            <Box sx={{ width: "100%", mb: 4, margin: "auto", px: 10, marginLeft: "10px" }}>
                 {/* Header y Botón Agregar */}
-                <div className="flex justify-between items-center mt-6 mb-4">
+                <div className="flex justify-center items-center mt-6 mb-4">
                     <h1 className="text-2xl font-bold text-purple-mid">
-                        Gestiones ({totalItems})
+                        Lista de Gestiones ({totalItems})
                     </h1>
-                    {can("management.create") && (
-                        <ButtonAdd
-                            id={idAddManagement}
-                            onClickButtonAdd={() => {
-                                navigate(
-                                    `/gestiones/añadir?identification_number=${
-                                        filters.identification_number || ""
-                                    }`,
-                                );
-                            }}
-                            text="Agregar Gestión"
-                        />
-                    )}
                 </div>
 
                 {/* Filtros */}
-                <div className="flex justify-end mb-4 gap-2">
+                <div className="flex justify-between mb-4 ">
+                    <ButtonAdd
+                        className="lg:ml-[0%]"
+                        id={idAddManagement}
+                        onClickButtonAdd={() => {
+                            navigate(
+                                `/gestiones/añadir?identification_number=${
+                                    filters.identification_number || ""
+                                }`,
+                            );
+                        }}
+                        text="Agregar Gestión"
+                    />
                     <MultiFilter
                         onAddFilter={addFilter}
                         onRemoveFilter={removeFilter}

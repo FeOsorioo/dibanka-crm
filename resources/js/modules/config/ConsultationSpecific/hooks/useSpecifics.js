@@ -7,11 +7,13 @@ import {
     deleteSpecific,
     getConsultationsForSelect,
     getActivePayrolls,
+    getCampaigns,
 } from "@modules/config/ConsultationSpecific/services/specificService";
 
 export const useSpecifics = () => {
     const [specifics, setSpecifics] = useState([]);
     const [payroll, setPayroll] = useState([]);
+    const [campaign, setCampaign] = useState([]);
     const [consultations, setConsultations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -30,10 +32,14 @@ export const useSpecifics = () => {
         consultation_id: null,
     });
 
+    /* ===========================================================
+     *  Obtener consultas específicas
+     * =========================================================== */
     const fetchSpecifics = useCallback(async (page = 1, search = "") => {
         setLoading(true);
         try {
             const data = await getSpecifics(page, search);
+            console.log(data)
             setSpecifics(data.specifics);
             setTotalPages(data.pagination.total_pages);
             setCurrentPage(data.pagination.current_page);
@@ -67,6 +73,9 @@ export const useSpecifics = () => {
         [fetchSpecifics],
     );
 
+    /* ===========================================================
+     *  Obtener consultas generales para selector
+     * =========================================================== */
     const fetchConsultationsData = useCallback(async () => {
         setLoading(true);
         try {
@@ -83,6 +92,10 @@ export const useSpecifics = () => {
         fetchConsultationsData();
     }, [fetchConsultationsData]);
 
+
+    /* ===========================================================
+     *  Obtener pagadurías para selector
+     * =========================================================== */
     const fetchPayroll = useCallback(async () => {
         setLoading(true);
         try {
@@ -100,6 +113,9 @@ export const useSpecifics = () => {
         fetchPayroll();
     }, [fetchPayroll]);
 
+    /* ===========================================================
+     *  Guardar consulta específica
+     * =========================================================== */
     const handleSave = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -139,6 +155,9 @@ export const useSpecifics = () => {
         }
     };
 
+    /* ===========================================================
+     *  Editar consulta específica
+     * =========================================================== */
     const handleEdit = (item) => {
         setFormData({
             id: item.id,
@@ -149,6 +168,9 @@ export const useSpecifics = () => {
         setIsOpenADD(true);
     };
 
+    /* ===========================================================
+     *  Eliminar consulta específica
+     * =========================================================== */
     const handleDelete = async (id, status) => {
         const actionText = !status ? "activar" : "desactivar";
 
@@ -194,7 +216,28 @@ export const useSpecifics = () => {
         setValidationErrors({});
     };
 
+    /* ===========================================================
+     *  Obtener campañas para selector
+     * =========================================================== */
+    const fetchCampaign = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await getCampaigns();
+            setCampaign(data.campaign || data); // Fallback in case structure varies
+        } catch (err) {
+            console.error("Error al obtener campañas:", err);
+            setError("Error al obtener las campañas.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchCampaign();
+    }, [fetchCampaign]);
+
     return {
+        campaign,
         specifics,
         payroll,
         consultations,

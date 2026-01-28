@@ -14,6 +14,12 @@ import * as yup from "yup";
  * =========================================================== */
 const fields = [
     {
+        name: "campaign_ids",
+        label: "Campañas",
+        type: "multiselect",
+        options: [],
+    },
+    {
         name: "payroll_ids",
         label: "Pagadurías",
         type: "multiselect",
@@ -31,6 +37,10 @@ const consultSchema = yup.object().shape({
         .array()
         .min(1, "Debe seleccionar al menos una pagaduría")
         .required("Las pagadurías son obligatorias"),
+    campaign_ids: yup
+        .array()
+        .min(1, "Debe seleccionar al menos una campaña")
+        .required("Las campañas son obligatorias"),
 });
 
 /* ===========================================================
@@ -38,6 +48,25 @@ const consultSchema = yup.object().shape({
  * =========================================================== */
 const columns = [
     { header: "ID", key: "id" },
+    {
+        header: "Campaña",
+        key: "campaign",
+        render: (row) => {
+            if (
+                !row.campaign ||
+                (Array.isArray(row.campaign) && row.campaign.length === 0)
+            )
+                return "Sin relaciones";
+
+            // Si es un array de pagadurías
+            if (Array.isArray(row.campaign)) {
+                return row.campaign.map((p) => p.name).join(", ");
+            }
+
+            // Si es un objeto único
+            return row.campaign.name || "—";
+        },
+    },
     {
         header: "Pagadurías",
         key: "payrolls",
@@ -66,6 +95,7 @@ const columns = [
 const Consultation = () => {
     // Hook unificado para Consultas
     const {
+        campaign,
         consultations,
         payroll,
         loading,
@@ -150,6 +180,14 @@ const Consultation = () => {
                                   options: payroll.map((p) => ({
                                       value: p.id,
                                       label: p.name,
+                                  })),
+                              }
+                            : f.name === "campaign_ids"
+                            ? {
+                                  ...f,
+                                  options: campaign.map((c) => ({
+                                      value: c.id,
+                                      label: c.name,
                                   })),
                               }
                             : f,

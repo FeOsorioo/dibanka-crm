@@ -26,8 +26,11 @@ class ConsultationRequest extends FormRequest
         $consultationID = $this->route('consultations') ?->id;
 
         return [
-            'name'          => 'required|string|max:255|min:1',
-            'payroll_ids'    => 'required|array|exists:payrolls,id'
+            'name'           => 'required|string|max:255|min:1',
+            'payroll_ids'    => 'required|array',
+            'payroll_ids.*'  => 'exists:payrolls,id',
+            'campaign_ids'   => 'nullable|array',
+            'campaign_ids.*' => 'exists:campaign,id',
         ];
     }
 
@@ -39,7 +42,11 @@ class ConsultationRequest extends FormRequest
             'name.max'      => 'El campo motivo de consulta no debe exceder los 255 caracteres.',
 
             'payroll_ids.required' => 'La pagaduria es obligatoria.',
-            'payroll_ids.exists' => 'La pagaduria seleccionada no existe.'
+            'payroll_ids.array'    => 'El formato de las pagadurías es inválido.',
+            'payroll_ids.*.exists' => 'Una de las pagadurías seleccionadas no existe.',
+            
+            'campaign_ids.array'    => 'El formato de las campañas es inválido.',
+            'campaign_ids.*.exists' => 'Una de las campañas seleccionadas no existe.',
         ];
     }
 }

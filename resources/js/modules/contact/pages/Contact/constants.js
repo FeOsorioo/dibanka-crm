@@ -37,10 +37,12 @@ export const fields = [
 export const userSchema = yup.object().shape({
     campaign_id: yup.string().required("La campaña es obligatorio"),
     payroll_id: yup.string().required("La pagaduría es obligatorio"),
-    entity_id: yup.string().required("La entidad es obligatoria"),
-    name: yup
-        .string()
-        .required("El nombre es obligatorio"),
+    entity_id: yup.string().when("campaign_id", {
+        is: (val) => Number(val) === 1, // Aliados
+        then: (schema) => schema.required("La entidad es obligatoria"),
+        otherwise: (schema) => schema.notRequired(),
+    }),
+    name: yup.string().required("El nombre es obligatorio"),
     phone: yup.string().required("El teléfono es obligatorio"),
     email: yup.string().required("El correo electrónico es obligatorio"),
     update_phone: yup

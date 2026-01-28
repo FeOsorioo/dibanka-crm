@@ -43,6 +43,7 @@ class ManagementResource extends JsonResource
                 return [
                     'id'                    => $this->contact->id,
                     'name'                  => $this->contact->name,
+                    'entity'                => $this->contact->entity->name,
                     'identification_type'   => $this->contact->identification_type,
                     'identification_number' => $this->contact->identification_number,
                     'phone'                 => $this->contact->phone,

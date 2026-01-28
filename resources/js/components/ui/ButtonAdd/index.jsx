@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { FaRegAddressBook } from "react-icons/fa";
 
-const ButtonAdd = ({ onClickButtonAdd, text, id }) => {
+const ButtonAdd = ({ onClickButtonAdd, text, id, className }) => {
     return (
-        <div className="flex justify-center lg:justify-start ml-0 lg:ml-[7%]">
+        <div className={`flex justify-center lg:justify-start ml-0 ${className ? className : "lg:ml-[7%]"}`}>
             <motion.button
                 id={id}
                 className="relative flex items-center justify-center bg-gradient-primary 
-                           w-12 h-12 lg:w-72 lg:h-auto lg:px-6 lg:py-2 lg:gap-3 
+                           w-12 h-12 lg:w-72 lg:h-11 lg:px-6 lg:py-2 lg:gap-3 
                            rounded-full lg:rounded-2xl text-white font-semibold shadow-lg 
                            group overflow-hidden"
                 onClick={onClickButtonAdd}
@@ -82,7 +82,7 @@ const ButtonAdd = ({ onClickButtonAdd, text, id }) => {
                 <motion.div
                     className="lg:hidden absolute -bottom-14 left-2/4 -translate-x-1/2 
                                bg-gray-900/95 backdrop-blur-sm text-white text-xs px-3 py-2 
-                               rounded-lg whitespace-nowrap pointer-events-none z-20 shadow-xl"
+                               rounded-lg whitespace-nowrap pointer-events-none z-10 shadow-xl"
                     initial={{ opacity: 0, y: -10, scale: 0.8 }}
                     whileHover={{ 
                         opacity: 1, 
@@ -97,7 +97,7 @@ const ButtonAdd = ({ onClickButtonAdd, text, id }) => {
                 >
                     {text}
                     <motion.div 
-                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 
+                        className="absolute -top-1 left- -translate-x-1/2 w-2 h-2 
                                    bg-gray-900/95 rotate-45" 
                     />
                 </motion.div>

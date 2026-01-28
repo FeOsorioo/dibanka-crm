@@ -12,17 +12,8 @@ export const getSpecifics = async (page = 1, search = "") => {
         `/config/specifics?page=${page}&search=${encodeURIComponent(search)}`,
     );
 
-    const specifics = (data.specifics || []).map((s) => ({
-        ...s,
-        consultation: s.consultation?.name || "—",
-        consultation_id: s.consultation?.id || null,
-        payroll: s.consultation?.payrolls?.map((p) => p.name).join(", ") || "—",
-    }));
-
-    return {
-        specifics,
-        pagination: data.pagination,
-    };
+    console.log(data);
+    return data;
 };
 
 /**
@@ -74,4 +65,12 @@ export const getConsultationsForSelect = async () => {
 export const getActivePayrolls = async () => {
     const { data } = await api.get("/payrolls/active");
     return data.data || [];
+};
+
+/**
+ * Obtiene todas las campañas.
+ */
+export const getCampaigns = async () => {
+    const { data } = await api.get("/campaign");
+    return data || [];
 };

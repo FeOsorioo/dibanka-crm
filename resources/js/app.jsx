@@ -120,7 +120,7 @@ const AppContent = () => {
                         <Route
                             path="/gestiones/añadir"
                             element={
-                                <ProtectedRoute permission="management.create">
+                                <ProtectedRoute permission="management.view">
                                     <ManagementStaticDataProvider>
                                         <Layout>
                                             <AddManagement />

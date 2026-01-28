@@ -125,6 +125,8 @@ export const useAddManagementForm = () => {
     // FUNCIONES LÓGICAS
     // ==========================
 
+    const isAliados = selectedContact?.campaign?.name === "Aliados";
+
     // Construye el payload
     const buildPayload = () => {
         const payload = {
@@ -141,6 +143,10 @@ export const useAddManagementForm = () => {
             wsp: wsp ? 1 : 0,
             sms: sms ? 1 : 0,
         };
+
+        if (isAliados && selectedPayroll) {
+            payload.payroll_id = selectedPayroll.id;
+        }
 
         return payload;
     };
@@ -292,6 +298,15 @@ export const useAddManagementForm = () => {
     };
 
     const onSave = async () => {
+        // Validación condicional para Aliados
+        if (isAliados && !selectedPayroll) {
+            setValidationErrors((prev) => ({
+                ...prev,
+                payroll_id: ["La pagaduría es requerida para Aliados"],
+            }));
+            return;
+        }
+
         const payload = buildPayload();
 
         // Eliminar validación de campaña
@@ -437,5 +452,6 @@ export const useAddManagementForm = () => {
         handleCancelEdit,
         handleSaveContactEdit,
         handleClearConact,
+        isAliados,
     };
 };

@@ -6,7 +6,7 @@ import {
     getContacts,
 } from "@modules/management/services/managementService";
 import { useManagementStaticData } from "@modules/management/context/ManagementStaticDataContext";
-import { useDebounce } from "@modules/management/hooks/useDebounce";
+import { useMultiFilter } from "@hooks/useMultiFilter";
 
 export const useAddManagement = (selectedPayroll = null) => {
     // Usar datos estáticos del contexto compartido
@@ -31,17 +31,21 @@ export const useAddManagement = (selectedPayroll = null) => {
     // Contactos (Estado local para el buscador)
     const [currentPageContact, setCurrentPageContact] = useState(1);
     const [totalPagesContact, setTotalPagesContact] = useState(1);
-    const [searchTermContact, setSearchTermContact] = useState("");
     const [perPageContact, setPerPageContact] = useState(10);
     const [totalItemsContact, setTotalItemsContact] = useState(0);
+
+    // === Nuevo Sistema de Filtros para Contactos ===
+    const {
+        filters: filtersContact,
+        addFilter: addFilterContact,
+        removeFilter: removeFilterContact,
+        clearFilters: clearFiltersContact,
+    } = useMultiFilter();
 
     // Modales
     const [IsOpenADD, setIsOpenADD] = useState(false);
     const [view, setView] = useState(false);
     const [modal, setModal] = useState(false);
-
-    // Debounce para búsqueda de contactos
-    const debouncedSearchContact = useDebounce(searchTermContact, 500);
 
     // Refs para evitar loops
     const isFetchingContacts = useRef(false);
@@ -64,32 +68,39 @@ export const useAddManagement = (selectedPayroll = null) => {
     /* ===========================================================
      *  FETCH CONTACTOS
      * =========================================================== */
-    const fetchContacts = useCallback(async (page = 1, search = "") => {
-        if (isFetchingContacts.current) return;
+    const fetchContacts = useCallback(
+        async (page = 1, filters = filtersContact) => {
+            if (isFetchingContacts.current) return;
 
-        isFetchingContacts.current = true;
-        try {
-            const contactData = await getContacts(page, search);
-            setContact(contactData.contacts || []);
-            setCurrentPageContact(contactData.pagination?.current_page || 1);
-            setTotalPagesContact(
-                contactData.pagination?.total_pages ||
-                    contactData.pagination?.last_page ||
-                    1,
-            );
-            setPerPageContact(contactData.pagination?.per_page || 10);
-            setTotalItemsContact(contactData.pagination?.total_contacts || 0);
-        } catch (err) {
-            console.error("Error al obtener contactos:", err);
-        } finally {
-            isFetchingContacts.current = false;
-        }
-    }, []);
+            isFetchingContacts.current = true;
+            try {
+                const contactData = await getContacts(page, filters);
+                setContact(contactData.contacts || []);
+                setCurrentPageContact(
+                    contactData.pagination?.current_page || 1,
+                );
+                setTotalPagesContact(
+                    contactData.pagination?.total_pages ||
+                        contactData.pagination?.last_page ||
+                        1,
+                );
+                setPerPageContact(contactData.pagination?.per_page || 10);
+                setTotalItemsContact(
+                    contactData.pagination?.total_contacts || 0,
+                );
+            } catch (err) {
+                console.error("Error al obtener contactos:", err);
+            } finally {
+                isFetchingContacts.current = false;
+            }
+        },
+        [filtersContact],
+    );
 
     // Cargar contactos
     useEffect(() => {
-        fetchContacts(currentPageContact, debouncedSearchContact);
-    }, [currentPageContact, debouncedSearchContact, fetchContacts]);
+        fetchContacts(1, filtersContact);
+    }, [filtersContact, fetchContacts]);
 
     /* ===========================================================
      *  CREAR / ACTUALIZAR GESTIÓN
@@ -149,14 +160,12 @@ export const useAddManagement = (selectedPayroll = null) => {
         setCurrentPage(1);
     }, []);
 
-    const fetchPageContact = useCallback((page) => {
-        setCurrentPageContact(page);
-    }, []);
-
-    const handleSearchContact = useCallback((value) => {
-        setSearchTermContact(value);
-        setCurrentPageContact(1);
-    }, []);
+    const fetchPageContact = useCallback(
+        (page) => {
+            fetchContacts(page, filtersContact);
+        },
+        [fetchContacts, filtersContact],
+    );
 
     const clearValidationError = useCallback((field) => {
         setValidationErrors((prev) => {
@@ -200,8 +209,10 @@ export const useAddManagement = (selectedPayroll = null) => {
             perPageContact,
             totalItemsContact,
             fetchPageContact,
-            handleSearchContact,
-            searchTermContact,
+            filtersContact,
+            addFilterContact,
+            removeFilterContact,
+            clearFiltersContact,
         }),
         [
             management,
@@ -227,8 +238,10 @@ export const useAddManagement = (selectedPayroll = null) => {
             handleSubmit,
             clearValidationError,
             fetchPageContact,
-            handleSearchContact,
-            searchTermContact,
+            filtersContact,
+            addFilterContact,
+            removeFilterContact,
+            clearFiltersContact,
         ],
     );
 

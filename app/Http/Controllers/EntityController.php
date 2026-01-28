@@ -27,6 +27,32 @@ class EntityController extends Controller
                 ->orWhere('description', 'LIKE', "%{$searchTerm}%");
             });
         }
+        
+
+        // 🔎 Filtro por nombre
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        }
+
+        // 🔎 Filtro por teléfono
+        if ($request->filled('phone')) {
+            $query->where('phone', 'LIKE', '%' . $request->phone . '%');
+        }
+
+        // 🔎 Filtro por correo electrónico
+        if ($request->filled('email')) {
+            $query->where('email', 'LIKE', '%' . $request->email . '%');
+        }
+
+        // 🔎 Filtro por NIT
+        if ($request->filled('nit')) {
+            $query->where('nit', 'LIKE', '%' . $request->nit . '%');
+        }
+
+        // 🔎 Filtro por descripción
+        if ($request->filled('description')) {
+            $query->where('description', 'LIKE', '%' . $request->description . '%');
+        }
 
         $entities = $query->orderBy('id', 'desc')->paginate(10);
         

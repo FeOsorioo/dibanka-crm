@@ -50,12 +50,16 @@ const Entity = () => {
 
     return (
         <>
-            {can("contact.create") && (
-                <ButtonAdd
-                    onClickButtonAdd={() => setIsOpenADD(true)}
-                    text="Agregar entidad"
-                />
-            )}
+
+            <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
+                Lista de Entidades (Operadores)
+            </h1>
+
+            <ButtonAdd
+                onClickButtonAdd={() => setIsOpenADD(true)}
+                disabled={!can("contact.create")}
+                text="Agregar entidad"
+            />
 
             <div className="flex justify-end px-12 -mt-10 gap-2 pb-10">
                 <MultiFilter
@@ -67,10 +71,6 @@ const Entity = () => {
                     className="w-full max-w-2xl"
                 />
             </div>
-
-            <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
-                Lista de Entidades
-            </h1>
 
             <FormAdd
                 isOpen={isOpenADD}

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useCan } from "@hooks/useCan";
 import {
     FormControl,
     InputLabel,
@@ -30,6 +31,7 @@ import { FiX, FiSave, FiEdit2, FiUserX } from "react-icons/fi";
 import { LuUserPen } from "react-icons/lu";
 
 const AddManagement = () => {
+    const { can } = useCan();
     const {
         sms,
         wsp,
@@ -77,6 +79,7 @@ const AddManagement = () => {
         handleCancelEdit,
         handleSaveContactEdit,
         handleClearConact,
+        isAliados,
     } = useAddManagementForm();
 
     const formContactFields = useMemo(() => {
@@ -108,9 +111,11 @@ const AddManagement = () => {
         perPageContact,
         totalItemsContact,
         loadingContact,
-        handleSearchContact,
         fetchPageContact,
-        searchTermContact,
+        filtersContact,
+        addFilterContact,
+        removeFilterContact,
+        clearFiltersContact,
         selectedContactSpecial,
         setSelectedContactSpecial,
         validationErrorsSpecial,
@@ -470,11 +475,13 @@ const AddManagement = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div
+                className={`grid ${isAliados ? "grid-cols-3" : "grid-cols-2"} gap-4`}
+            >
                 {/* Autocompletado de Tipo de gestión */}
                 <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-100 flex flex-col gap-3">
                     <h2 className="text-2xl font-bold text-gray-800">
-                        Tipo de gestión 
+                        Tipo de gestión
                     </h2>
                     <Autocomplete
                         disabled={!selectedContact}
@@ -503,10 +510,40 @@ const AddManagement = () => {
                     />
                 </div>
 
+                {/* Selector de Pagaduría (Condicional para Aliados) */}
+                {isAliados && (
+                    <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-100 flex flex-col gap-3">
+                        <h2 className="text-2xl font-bold text-gray-800">
+                            Pagaduría de la gestión
+                        </h2>
+                        <Autocomplete
+                            options={payroll}
+                            getOptionLabel={(option) => option?.name || ""}
+                            value={selectedPayroll}
+                            onChange={(event, value) => {
+                                setSelectedPayroll(value);
+                                clearValidationError("payroll_id");
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Seleccione pagaduría"
+                                    error={!!validationErrors.payroll_id}
+                                    helperText={
+                                        validationErrors.payroll_id
+                                            ? validationErrors.payroll_id[0]
+                                            : ""
+                                    }
+                                />
+                            )}
+                        />
+                    </div>
+                )}
+
                 {/* Selector de solución en primer contacto */}
                 <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-100 flex flex-col gap-3">
                     <h2 className="text-2xl font-bold text-gray-800">
-                        Solución en el primer contacto
+                        Solución primer contacto
                     </h2>
                     <FormControl fullWidth error={!!validationErrors.solution}>
                         <InputLabel id="solucion-label">Solución</InputLabel>
@@ -712,7 +749,7 @@ const AddManagement = () => {
                 <Button
                     variant="contained"
                     onClick={onSave}
-                    disabled={!selectedContact}
+                    disabled={!selectedContact || !can("management.create")}
                 >
                     Guardar
                 </Button>
@@ -744,9 +781,11 @@ const AddManagement = () => {
                 perPageContact={perPageContact}
                 totalItemsContact={totalItemsContact}
                 loadingContact={loadingContact}
-                handleSearchContact={handleSearchContact}
                 fetchPageContact={fetchPageContact}
-                searchTermContact={searchTermContact}
+                filtersContact={filtersContact}
+                addFilterContact={addFilterContact}
+                removeFilterContact={removeFilterContact}
+                clearFiltersContact={clearFiltersContact}
             />
 
             {/* POPUP DE BUSCADOR CONTACT */}
@@ -760,9 +799,11 @@ const AddManagement = () => {
                 perPageContact={perPageContact}
                 totalItemsContact={totalItemsContact}
                 loadingContact={loadingContact}
-                handleSearchContact={handleSearchContact}
                 fetchPageContact={fetchPageContact}
-                searchTermContact={searchTermContact}
+                filtersContact={filtersContact}
+                addFilterContact={addFilterContact}
+                removeFilterContact={removeFilterContact}
+                clearFiltersContact={clearFiltersContact}
             />
 
             {/* Snackbar para alertar al agente que hay errores en el formulario */}

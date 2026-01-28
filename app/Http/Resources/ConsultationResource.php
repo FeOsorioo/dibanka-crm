@@ -22,7 +22,13 @@ class ConsultationResource extends JsonResource
                     'id'   => $payroll->id,
                     'name' => $payroll->name,
                 ];
-            }),            
+            }),     
+            'campaign'  => $this->campaign->map(function ($campaign) {
+                return [
+                    'id'   => $campaign->id,
+                    'name' => $campaign->name,
+                ];
+            }),       
             'is_active'             => $this->is_active,
             'created_at'            => $this->created_at->format('Y-m-d H:i:s')
         ];

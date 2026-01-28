@@ -65,6 +65,8 @@ export const useContact = () => {
         identification_number: "",
         update_phone: "",
         email: "",
+        entity_id: "",
+        entity_name: "",
     });
 
     // ====================== Fetch Contactos ======================
@@ -85,7 +87,7 @@ export const useContact = () => {
                 setLoading(false);
             }
         },
-        [filters]
+        [filters],
     );
 
     useEffect(() => {
@@ -94,7 +96,7 @@ export const useContact = () => {
 
     const fetchPage = useCallback(
         (page) => fetchContact(page, filters),
-        [fetchContact, filters]
+        [fetchContact, filters],
     );
 
     // Reaccionar a cambios en filtros para recargar desde pag 1
@@ -130,7 +132,7 @@ export const useContact = () => {
             setCurrentPageH(1);
             fetchHistoryChanges(contact.id, 1);
         },
-        [fetchHistoryChanges]
+        [fetchHistoryChanges],
     );
 
     // Función para cambiar de página en el historial
@@ -140,7 +142,7 @@ export const useContact = () => {
                 fetchHistoryChanges(selectedContact.id, page);
             }
         },
-        [selectedContact, fetchHistoryChanges]
+        [selectedContact, fetchHistoryChanges],
     );
 
     // ====================== Crear / Editar ======================
@@ -155,6 +157,8 @@ export const useContact = () => {
             update_phone: item.update_phone,
             identification_type: item.identification_type,
             identification_number: item.identification_number,
+            entity_id: item.entity?.id || "",
+            entity_name: item.entity?.name || "",
         });
         setValidationErrors({});
         setIsOpenADD(true);

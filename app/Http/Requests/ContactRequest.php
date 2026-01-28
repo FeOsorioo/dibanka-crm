@@ -35,9 +35,10 @@ class ContactRequest extends FormRequest
             'campaign_id'      => 'required',
             'payroll_id'    => 'required|numeric',
             'payroll_id.*'  => 'integer|exists:payrolls,id',
+            'entity_id'     => 'numeric|exists:entities,id|nullable',
             'name'          => 'required|string|max:255',
             'email'         => 'required|email|max:255',
-            'phone'         => 'nullable|digits:10',
+            'phone'         => 'required|digits:10',
             'update_phone'  => 'required|digits:10',
             'identification_type'   => 'required|string',
             'identification_number' => ['required','numeric', Rule::unique(Contact::class)->ignore($contactID)], 
@@ -53,6 +54,9 @@ class ContactRequest extends FormRequest
             'payroll_id.*.exists'   => 'La pagaduría seleccionada no existe',
             'payroll_id.numeric'     => 'El campo pagaduría es erroneo',
 
+            'entity_id.exists'       => 'La entidad seleccionada no existe',
+            'entity_id.numeric'      => 'El campo entidad es erroneo',
+
             'name.required'         => 'El campo nombre es obligatorio.',
             'name.string'           => 'El campo nombre debe ser una cadena de texto.',
             'name.max'              => 'El campo nombre no debe exceder los 255 caracteres.',
@@ -62,6 +66,7 @@ class ContactRequest extends FormRequest
             'email.max'             => 'El campo correo electrónico no debe exceder los 255 caracteres.',
 
             'phone.digits'          => 'El campo teléfono debe tener exactamente 10 dígitos.',
+            'phone.required'        => 'El campo teléfono es obligatorio.',
 
             'update_phone.digits'   => 'El campo celular actualizado debe tener exactamente 10 dígitos.',
             'update_phone.required' => 'El campo celular actualizado es obligatorio',

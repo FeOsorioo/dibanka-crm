@@ -9,6 +9,9 @@ import HistoryChanges from "@components/ui/HistoryChanges";
 import { useContact } from "@modules/contact/hooks/useContact";
 import { fields, userSchema, columns, filterOptions } from "./constants";
 import TableSkeleton from "@components/tables/TableSkeleton";
+import SearchEntity from "@components/modals/SearchEntity";
+import { useState } from "react";
+import { Box } from "@mui/material";
 
 const Contact = ({
     addContact,
@@ -58,6 +61,17 @@ const Contact = ({
         clearFilters,
     } = useContact();
 
+    const [isOpenSearchEntity, setIsOpenSearchEntity] = useState(false);
+
+    const handleSelectEntity = (entity) => {
+        setFormData((prev) => ({
+            ...prev,
+            entity_id: entity.id,
+            entity_name: entity.name,
+        }));
+        setIsOpenSearchEntity(false);
+    };
+
     // Efecto para leer parámetros de la URL y filtrar automáticamente
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -88,19 +102,34 @@ const Contact = ({
     }, [formData.campaign_id, setFormData]);
 
     const formFields = useMemo(() => {
-        return fields.map((field) => {
-            if (field.name === "payroll_id") {
-                return {
-                    ...field,
-                    options: payroll.map((p) => ({
-                        value: p.id,
-                        label: p.name,
-                    })),
-                };
-            }
-            return field;
-        });
-    }, [payroll]);
+        return fields
+            .filter((field) => {
+                if (field.name === "entity_id") {
+                    return Number(formData.campaign_id) === 1;
+                }
+                return true;
+            })
+            .map((field) => {
+                if (field.name === "payroll_id") {
+                    return {
+                        ...field,
+                        options: payroll.map((p) => ({
+                            value: p.id,
+                            label: p.name,
+                        })),
+                    };
+                }
+                if (field.name === "entity_id") {
+                    return {
+                        ...field,
+                        type: "search-input",
+                        displayField: "entity_name",
+                        onSearch: () => setIsOpenSearchEntity(true),
+                    };
+                }
+                return field;
+            });
+    }, [payroll, formData.campaign_id]);
 
     const handleNavigateManagement = useCallback(
         (row) => {
@@ -109,24 +138,30 @@ const Contact = ({
                 (row.campaign_id === 1 ? "Aliados" : "Afiliados");
             navigate(
                 `/gestiones?search=${encodeURIComponent(
-                    row.identification_number
-                )}&campaign=${campaignName}`
+                    row.identification_number,
+                )}&campaign=${campaignName}`,
             );
         },
-        [navigate]
+        [navigate],
     );
 
     return (
         <>
-            {can("contact.create") && (
+            <Box sx={{ width: "100%", mb: 4, margin: "auto", px: 10, marginLeft: "10px" }}>
+            
+            <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
+                Lista de Contactos
+            </h1>
+            
+            <div className="flex justify-between mb-4 ">
                 <ButtonAdd
+                    className="lg:ml-[0%]"
                     id={addContact}
+                    disabled={!can("contact.create")}
                     onClickButtonAdd={() => setIsOpenADD(true)}
                     text="Agregar contacto"
                 />
-            )}
 
-            <div className="flex justify-end px-12 -mt-10 gap-2 pb-10">
                 <MultiFilter
                     onAddFilter={addFilter}
                     onRemoveFilter={removeFilter}
@@ -136,10 +171,6 @@ const Contact = ({
                     className="w-full max-w-2xl"
                 />
             </div>
-
-            <h1 className="text-2xl font-bold text-center mb-4 text-purple-mid">
-                Lista de Contactos
-            </h1>
 
             <FormAdd
                 isOpen={isOpenADD}
@@ -153,11 +184,11 @@ const Contact = ({
                 fields={formFields}
                 schema={userSchema}
             />
-
             {loading ? (
                 <TableSkeleton row="9" />
             ) : (
                 <Table
+                    width="100%"
                     columns={columns}
                     data={contact}
                     currentPage={currentPage}
@@ -192,6 +223,13 @@ const Contact = ({
                 perPage={perPageH}
                 onPageChange={fetchHistoryPage}
             />
+
+            <SearchEntity
+                isOpen={isOpenSearchEntity}
+                setIsOpen={setIsOpenSearchEntity}
+                onSelectEntity={handleSelectEntity}
+            />
+            </Box>
         </>
     );
 };

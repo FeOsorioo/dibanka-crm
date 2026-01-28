@@ -59,6 +59,13 @@ class ContactController extends Controller
             });
         }
 
+        // 🔎 Filtro por entity.name
+        if ($request->filled('entity')) {
+            $query->whereHas('entity', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->entity . '%');
+            });
+        }
+
         // 🔎 Búsqueda general si no hay filtros específicos
         if (
             $request->filled('search') &&
@@ -74,7 +81,7 @@ class ContactController extends Controller
         }
 
         // Cargar relaciones y paginar
-        $contacts = $query->with('payroll', 'campaign')->orderBy('id', 'desc')->paginate(10);
+        $contacts = $query->with('payroll', 'campaign', 'entity')->orderBy('id', 'desc')->paginate(10);
 
         // Construcción criterios para logs
         $searchCriteria = [];
@@ -129,6 +136,31 @@ class ContactController extends Controller
             });
         }
 
+        // 🔎 Filtrar por entity.name
+        if ($request->filled('entity')) {
+            $query->whereHas('entity', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->entity . '%');
+            });
+        }
+
+        // 🔎 Filtrar por nombre
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        }
+
+        // 🔎 Filtro por email
+        if ($request->filled('email')) {
+            $query->where('email', 'LIKE', '%' . $request->email . '%');
+        }
+
+        // 🔎 Filtro por teléfono
+        if ($request->filled('phone')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('phone', 'LIKE', '%' . $request->phone . '%')
+                    ->orWhere('update_phone', 'LIKE', '%' . $request->phone . '%');
+            });
+        }
+
         // 🔎 Buscar directamente por identificación
         if ($request->filled('identification_number')) {
             $query->where('identification_number', $request->identification_number);
@@ -140,7 +172,7 @@ class ContactController extends Controller
         }
 
         // Cargar relaciones + paginar
-        $contacts = $query->with('payroll', 'campaign')->paginate(10);
+        $contacts = $query->with('payroll', 'campaign', 'entity')->paginate(10);
 
         // Registro de actividad
         log_activity('ver_listado', 'Contactos Activos', [
@@ -168,7 +200,7 @@ class ContactController extends Controller
     public function store(ContactRequest $request)
     {
         $contacts = Contact::create($request->all());
-        $contacts->load(['payroll', 'campaign']);
+        $contacts->load(['payroll', 'campaign', 'entity']);
 
         log_activity('crear', 'Contactos', [
             'mensaje' => "El usuario {$request->user()->name} creó un nuevo contacto.",
@@ -212,6 +244,7 @@ class ContactController extends Controller
         $contacts->update($request->only(
             'campaign_id',
             'payroll_id',
+            'entity_id',
             'name',
             'identification_type',
             'phone',

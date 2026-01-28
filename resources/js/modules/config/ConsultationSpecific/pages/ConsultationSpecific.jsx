@@ -38,6 +38,7 @@ const schema = yup.object().shape({
  * =========================================================== */
 const columns = [
     { header: "ID", key: "id" },
+    { header: "Campaña", key: "campaign" },
     { header: "Pagaduría", key: "payroll" },
     { header: "Motivo General", key: "consultation" },
     { header: "Motivo Específico", key: "name" },
@@ -70,6 +71,20 @@ const ConsultationSpecific = () => {
         countActives,
         countInactives,
     } = useSpecifics();
+
+    const formattedSpecifics = specifics.map(specific => ({
+        ...specific,
+        // Convertir array de campañas a string separado por comas
+        campaign: specific.consultation?.campaign?.length > 0
+            ? specific.consultation.campaign.map(c => c.name).join(', ')
+            : 'Sin campaña',
+        // Convertir array de pagadurías a string
+        payroll: specific.consultation?.payrolls?.length > 0
+            ? specific.consultation.payrolls.map(p => p.name).join(', ')
+            : 'Sin pagaduría',
+        // Mantener el nombre de la consulta
+        consultation: specific.consultation?.name || 'N/A'
+    }));
 
     const statsCards = [
         { title: "Consultas Totales", value: totalItems },
@@ -136,7 +151,7 @@ const ConsultationSpecific = () => {
                 ) : (
                     <Table
                         columns={columns}
-                        data={specifics}
+                        data={formattedSpecifics}
                         currentPage={currentPage}
                         totalPages={totalPages}
                         rowsPerPage={perPage}

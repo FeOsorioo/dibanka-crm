@@ -86,6 +86,5 @@ export const getActivePayrolls = async () => {
  */
 export const getEntities = async () => {
     const { data } = await api.get("/entities/active");
-    console.log(data);
     return data.data;
 };

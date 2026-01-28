@@ -25,10 +25,14 @@ class Specific extends Model
 
     public function payroll()
     {
-        return $this->belongsToMany(Payroll::class, 'payroll_consultations')
+        return $this->belongsToMany(Payroll::class, 'consultations_payroll')
                     ->withTimestamps();
     }
 
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class, 'campaign_id');
+    }
 
     // Scope para traer solo registros activos
     public function scopeActive($query)

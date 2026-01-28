@@ -33,9 +33,12 @@ export default function FormSpecialCases({
     perPageContact = 10,
     totalItemsContact = 0,
     loadingContact = false,
-    handleSearchContact,
+
     fetchPageContact,
-    searchTermContact = "",
+    filtersContact,
+    addFilterContact,
+    removeFilterContact,
+    clearFiltersContact,
 }) {
     return (
         <>
@@ -96,7 +99,6 @@ export default function FormSpecialCases({
                                 />
                                 <button
                                     onClick={() => {
-                                        console.log("🔍 Abriendo búsqueda de contactos");
                                         setOpenSearchContact(true);
                                     }}
                                     className="px-5 bg-blue-50 hover:bg-blue-100 border-l border-gray-300 transition-all duration-200 group"
@@ -232,9 +234,11 @@ export default function FormSpecialCases({
                     perPageContact={perPageContact}
                     totalItemsContact={totalItemsContact}
                     loadingContact={loadingContact}
-                    handleSearchContact={handleSearchContact}
                     fetchPageContact={fetchPageContact}
-                    searchTermContact={searchTermContact}
+                    filtersContact={filtersContact}
+                    addFilterContact={addFilterContact}
+                    removeFilterContact={removeFilterContact}
+                    clearFiltersContact={clearFiltersContact}
                 />
             )}
         </>

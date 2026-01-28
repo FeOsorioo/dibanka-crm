@@ -1,81 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, IconButton } from "@mui/material";
 import { motion } from "framer-motion";
 import { IoClose } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
 import MultiFilter from "@components/ui/MultiFilter";
 import Table from "@components/tables/Table";
 import TableSkeleton from "@components/tables/TableSkeleton";
+import { useEntity } from "@modules/entity/hooks/useEntity";
 
 const filterOptions = [
-    { value: "identification_number", label: "Número de identificación" },
     { value: "name", label: "Nombre" },
+    { value: "nit", label: "NIT" },
     { value: "email", label: "Correo" },
     { value: "phone", label: "Teléfono" },
-    { value: "payroll", label: "Pagaduría" },
-    { value: "campaign", label: "Campaña" },
 ];
 
-export default function SearchContact({
-    isOpen,
-    setIsOpen,
-    onSelectContact,
-    contactSearch,
-    currentPageContact,
-    totalPagesContact,
-    perPageContact,
-    totalItemsContact,
-    loadingContact,
+export default function SearchEntity({ isOpen, setIsOpen, onSelectEntity }) {
+    const {
+        entities,
+        loading,
+        fetchEntities,
+        currentPage,
+        totalPages,
+        perPage,
+        totalItems,
+        fetchPage,
+        filters,
+        addFilter,
+        removeFilter,
+        clearFilters,
+    } = useEntity();
 
-    fetchPageContact,
-    filtersContact,
-    addFilterContact,
-    removeFilterContact,
-    clearFiltersContact,
-}) {
-    const navigate = useNavigate();
-
+    // Columns for the table
     const columns = [
         { header: "ID", key: "id" },
-        { header: "Campaña", key: "campaign.name" },
-        { header: "Pagaduría", key: "payroll.name" },
         { header: "Nombre", key: "name" },
+        { header: "NIT", key: "nit" },
         { header: "Correo", key: "email" },
-        { header: "Celular", key: "update_phone" },
-        { header: "Identificación", key: "identification_number" },
+        { header: "Teléfono", key: "phone" },
     ];
 
     const handleSelectRecord = (recordId) => {
-        const selected = contactSearch.find((item) => item.id === recordId);
+        const selected = entities.find((item) => item.id === recordId);
         if (selected) {
-            onSelectContact(selected);
-            // El modal se cierra desde el hook después de seleccionar
-        } else {
-            console.log("❌ Contacto no encontrado en la lista");
+            onSelectEntity(selected);
+            setIsOpen(false);
         }
     };
 
-    const handleEdit = (record) => {
-        navigate(
-            `/contactos?search=${encodeURIComponent(
-                record.identification_number,
-            )}&column=identification_number`,
-        );
-    };
-
-    const handleClearSearch = () => {
-        clearFiltersContact();
-    };
+    // Ensure we fetch data when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchEntities(1);
+        }
+    }, [isOpen, fetchEntities]);
 
     return (
         <Dialog
-            onClose={() => {
-                setIsOpen(false);
-            }}
+            onClose={() => setIsOpen(false)}
             open={isOpen}
             fullWidth
             maxWidth="lg"
-            // 🔥 FIX: Asegurar que esté por encima del Drawer
             sx={{
                 "& .MuiDialog-root": {
                     zIndex: 1400,
@@ -103,7 +87,7 @@ export default function SearchContact({
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-3">
                     <h2 className="text-2xl text-primary-strong font-semibold">
-                        Buscar contacto o cliente
+                        Buscar entidad
                     </h2>
 
                     <IconButton
@@ -126,10 +110,10 @@ export default function SearchContact({
                 <div className="flex justify-center mb-6">
                     <div className="w-full flex justify-end gap-2">
                         <MultiFilter
-                            onAddFilter={addFilterContact}
-                            onRemoveFilter={removeFilterContact}
-                            onClearFilters={clearFiltersContact}
-                            filters={filtersContact}
+                            onAddFilter={addFilter}
+                            onRemoveFilter={removeFilter}
+                            onClearFilters={clearFilters}
+                            filters={filters}
                             options={filterOptions}
                             className="w-full"
                         />
@@ -138,22 +122,20 @@ export default function SearchContact({
 
                 {/* TABLE / SKELETON */}
                 <div className="min-h-[420px]">
-                    {loadingContact ? (
+                    {loading ? (
                         <TableSkeleton rows={8} />
                     ) : (
                         <Table
                             width="100%"
                             columns={columns}
-                            data={contactSearch}
+                            data={entities}
                             paginationSection={true}
                             actions={true}
-                            edit={true}
-                            onEdit={handleEdit}
-                            currentPage={currentPageContact}
-                            totalPages={totalPagesContact}
-                            rowsPerPage={perPageContact}
-                            totalItems={totalItemsContact}
-                            fetchPage={fetchPageContact}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            rowsPerPage={perPage}
+                            totalItems={totalItems}
+                            fetchPage={fetchPage}
                             onActiveOrInactive={false}
                             selectRecord={true}
                             onSelectRecord={handleSelectRecord}
@@ -163,7 +145,7 @@ export default function SearchContact({
 
                 {/* Footer */}
                 <div className="mt-6 text-center text-sm text-gray-400">
-                    Selecciona un contacto para continuar 💬
+                    Selecciona una entidad para continuar 💬
                 </div>
             </motion.div>
         </Dialog>

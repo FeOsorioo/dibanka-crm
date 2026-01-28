@@ -362,9 +362,11 @@ const MuiTable = ({
                 <TablePagination
                     rowsPerPageOptions={[]}
                     component="div"
-                    count={totalItems}
+                    // Fallback seguro si totalItems no está definido
+                    count={typeof totalItems === "number" ? totalItems : data?.length ?? 0}
                     rowsPerPage={rowsPerPage}
-                    page={currentPage - 1}
+                    // Aseguramos que la página empieza en 0 cuando no hay valor
+                    page={Math.max((currentPage ?? 1) - 1, 0)}
                     onPageChange={handleChangePage}
                 />
             )}
